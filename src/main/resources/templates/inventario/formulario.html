@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  </head>
+  <body>
+    <div th:replace="~{fragmentos/layout :: menu}">
+    </div>
+    <main class="container-fluid contenido">
+      <div th:replace="~{fragmentos/layout :: mensajes}">
+      </div>
+      <div class="cabecera-pagina">
+        <div>
+          <p class="eyebrow">
+            CONTROL DE EXISTENCIAS
+          </p>
+          <h1>
+            Actualizar inventario
+          </h1>
+        </div>
+      </div>
+      <section class="panel formulario-panel">
+        <h2 th:text="${inventario.producto.nombre}">
+        </h2>
+        <p class="text-secondary" th:text="${inventario.producto.categoria.nombre}">
+        </p>
+        <form th:action="@{/inventario/guardar}" method="post">
+          <input type="hidden" name="id" th:value="${inventario.id}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="cantidad" class="form-label">
+                Cantidad disponible *
+              </label>
+              <input id="cantidad" name="cantidad" type="number" min="0" step="1" required th:value="${inventario.cantidad}" class="form-control">
+            </div>
+            <div class="col-md-6" sec:authorize="hasRole('ADMINISTRADOR')">
+              <label for="stockMinimo" class="form-label">
+                Stock mínimo *
+              </label>
+              <input id="stockMinimo" name="stockMinimo" type="number" min="0" step="1" required th:value="${inventario.stockMinimo}" class="form-control">
+            </div>
+            <div class="col-md-6" sec:authorize="hasRole('EMPLEADO')">
+              <label class="form-label" for="minimoLectura">
+                Stock mínimo
+              </label>
+              <input id="minimoLectura" readonly th:value="${inventario.stockMinimo}" class="form-control">
+            </div>
+          </div>
+          <p class="form-text mt-3">
+            La cantidad se sincronizará con el stock del producto.
+          </p>
+          <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary">
+              Guardar
+            </button>
+            <a class="btn btn-outline-secondary" th:href="@{/inventario}">
+              Cancelar
+            </a>
+          </div>
+        </form>
+      </section>
+    </main>
+    <div th:replace="~{fragmentos/layout :: pie}">
+    </div>
+  </body>
+</html>

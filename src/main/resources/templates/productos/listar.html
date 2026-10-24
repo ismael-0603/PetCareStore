@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  </head>
+  <body>
+    <div th:replace="~{fragmentos/layout :: menu}">
+    </div>
+    <main class="container-fluid contenido">
+      <div th:replace="~{fragmentos/layout :: mensajes}">
+      </div>
+      <div class="cabecera-pagina">
+        <div>
+          <p class="eyebrow">
+            CATÁLOGO &amp; BIENESTAR
+          </p>
+          <h1>
+            Productos
+          </h1>
+        </div>
+        <a class="btn btn-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos/nuevo}">
+          + Registrar producto
+        </a>
+      </div>
+      <form th:action="@{/productos}" method="get" class="panel row g-3 mb-4 filtros">
+        <div class="col-md-4">
+          <label for="buscar" class="form-label">
+            Buscar por nombre
+          </label>
+          <input id="buscar" name="nombre" th:value="${nombre}" class="form-control" placeholder="Ej. collar, alimento...">
+        </div>
+        <div class="col-md-4">
+          <label for="categoria" class="form-label">
+            Categoría
+          </label>
+          <select id="categoria" name="categoria" class="form-select">
+            <option value="">
+              Todas
+            </option>
+            <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}" th:selected="${c.id == categoriaFiltro}">
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="disponible" class="form-label">
+            Disponibilidad
+          </label>
+          <select id="disponible" name="disponible" class="form-select">
+            <option value="">
+              Todas
+            </option>
+            <option value="true" th:selected="${disponible != null and disponible}">
+              Con stock
+            </option>
+            <option value="false" th:selected="${disponible != null and !disponible}">
+              Sin stock
+            </option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="minimo" class="form-label">
+            Precio mínimo (S/)
+          </label>
+          <input id="minimo" name="minimo" type="number" min="0" step="0.01" th:value="${minimo}" class="form-control" placeholder="0.00">
+        </div>
+        <div class="col-md-3">
+          <label for="maximo" class="form-label">
+            Precio máximo (S/)
+          </label>
+          <input id="maximo" name="maximo" type="number" min="0" step="0.01" th:value="${maximo}" class="form-control" placeholder="0.00">
+        </div>
+        <div class="col-md-6 d-flex align-items-end gap-2">
+          <button class="btn btn-primary">
+            Aplicar filtros
+          </button>
+          <a class="btn btn-outline-secondary" th:href="@{/productos}">
+            Limpiar
+          </a>
+        </div>
+      </form>
+      <section class="panel p-0 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>
+                  ID
+                </th>
+                <th>
+                  Imagen
+                </th>
+                <th>
+                  Nombre
+                </th>
+                <th>
+                  Categoría
+                </th>
+                <th>
+                  Precio
+                </th>
+                <th>
+                  Stock
+                </th>
+                <th>
+                  Estado
+                </th>
+                <th>
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="r : ${registros}">
+                <td th:text="${r.id}">
+                </td>
+                <td>
+                  <img class="producto-miniatura" th:src="${r.imagen != null ? '/imagenes/' + r.imagen : '/img/producto.svg'}" th:alt="${r.nombre}">
+                </td>
+                <td class="fw-semibold" th:text="${r.nombre}">
+                </td>
+                <td th:text="${r.categoria.nombre}">
+                </td>
+                <td class="text-nowrap fw-semibold" th:text="${'S/ ' + #numbers.formatDecimal(r.precio,1,2)}">
+                </td>
+                <td th:text="${r.stock}">
+                </td>
+                <td>
+                  <span class="badge" th:classappend="${r.estado ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${r.estado ? 'Activo' : 'Inactivo'}">
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-sm btn-outline-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos/editar/{id}(id=${r.id})}">
+                      Editar
+                    </a>
+                    <form sec:authorize="hasRole('ADMINISTRADOR')" th:action="@{/productos/eliminar/{id}(id=${r.id})}" method="post" data-confirmar="¿Deseas eliminar este registro? Esta acción no se puede deshacer.">
+                      <button class="btn btn-sm btn-outline-danger">
+                        Eliminar
+                      </button>
+                    </form>
+                    <span class="text-secondary small" sec:authorize="hasRole('EMPLEADO')">
+                      Solo consulta
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(registros)}">
+                <td colspan="12" class="text-center py-5 text-secondary">
+                  No se encontraron registros.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <div th:replace="~{fragmentos/layout :: pie}">
+    </div>
+  </body>
+</html>

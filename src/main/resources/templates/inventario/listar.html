@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  </head>
+  <body>
+    <div th:replace="~{fragmentos/layout :: menu}">
+    </div>
+    <main class="container-fluid contenido">
+      <div th:replace="~{fragmentos/layout :: mensajes}">
+      </div>
+      <div class="cabecera-pagina">
+        <div>
+          <p class="eyebrow">
+            ABASTECIMIENTO EN TIEMPO REAL
+          </p>
+          <h1>
+            Inventario
+          </h1>
+        </div>
+      </div>
+      <section class="panel p-0 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>
+                  ID
+                </th>
+                <th>
+                  Producto
+                </th>
+                <th>
+                  Categoría
+                </th>
+                <th>
+                  Stock actual
+                </th>
+                <th>
+                  Stock mínimo
+                </th>
+                <th>
+                  Actualización
+                </th>
+                <th>
+                  Estado
+                </th>
+                <th>
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="r : ${registros}">
+                <td th:text="${r.id}">
+                </td>
+                <td class="fw-semibold" th:text="${r.producto.nombre}">
+                </td>
+                <td th:text="${r.producto.categoria.nombre}">
+                </td>
+                <td th:text="${r.cantidad}">
+                </td>
+                <td th:text="${r.stockMinimo}">
+                </td>
+                <td th:text="${#temporals.format(r.fechaActualizacion,'dd/MM/yyyy HH:mm')}">
+                </td>
+                <td>
+                  <span class="badge" th:classappend="${r.stockBajo ? 'text-bg-warning' : 'text-bg-success'}" th:text="${r.stockBajo ? 'STOCK BAJO' : 'NORMAL'}">
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-sm btn-outline-primary" th:href="@{/inventario/editar/{id}(id=${r.id})}">
+                      Actualizar
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(registros)}">
+                <td colspan="12" class="text-center py-5 text-secondary">
+                  No se encontraron registros.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <div th:replace="~{fragmentos/layout :: pie}">
+    </div>
+  </body>
+</html>

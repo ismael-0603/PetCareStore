@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:fragment="cabeza(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="${titulo}">
+      PetCare Store
+    </title>
+    <link rel="icon" th:href="@{/img/huella.svg}" type="image/svg+xml">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+  </head>
+  <body>
+    <header th:fragment="menu" class="barra-envoltura">
+      <nav class="navbar navbar-expand-lg barra">
+        <div class="container-fluid px-2">
+          <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/dashboard}">
+            <img class="marca-icono" th:src="@{/img/huella.svg}" width="34" height="34" alt="">
+            <span>PetCare <strong>Store</strong></span>
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navegacion" aria-controls="navegacion" aria-expanded="false" aria-label="Abrir menú">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navegacion">
+            <div class="navbar-nav mx-auto nav-pildoras">
+              <a class="nav-link" th:href="@{/dashboard}">
+                Inicio
+              </a>
+              <a class="nav-link" th:href="@{/productos}">
+                Productos
+              </a>
+              <a class="nav-link" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/categorias}">
+                Categorías
+              </a>
+              <a class="nav-link" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/clientes}">
+                Clientes
+              </a>
+              <a class="nav-link" th:href="@{/inventario}">
+                Inventario
+              </a>
+              <a class="nav-link" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/usuarios}">
+                Usuarios
+              </a>
+            </div>
+            <div class="sesion">
+              <span class="sesion-usuario" sec:authentication="name"></span>
+              <span class="badge rol-pildora" sec:authorize="hasRole('ADMINISTRADOR')">
+                Administrador
+              </span>
+              <span class="badge rol-pildora" sec:authorize="hasRole('EMPLEADO')">
+                Empleado
+              </span>
+              <form th:action="@{/logout}" method="post" class="d-inline">
+                <button class="btn btn-salir btn-sm">
+                  Salir
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div th:fragment="mensajes">
+      <div th:if="${exito}" class="alert alert-success mb-4" role="status" th:text="${exito}">
+      </div>
+      <div th:if="${error}" class="alert alert-danger mb-4" role="alert" th:text="${error}">
+      </div>
+    </div>
+    <footer th:fragment="pie" class="pie">
+      <span>
+        PetCare Store · Bienestar y cuidado animal en cada detalle
+      </span>
+      <script th:src="@{/vendor/bootstrap.bundle.min.js}">
+      </script>
+      <script th:src="@{/js/app.js}">
+      </script>
+    </footer>
+  </body>
+</html>

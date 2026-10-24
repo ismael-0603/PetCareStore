@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  </head>
+  <body>
+    <div th:replace="~{fragmentos/layout :: menu}">
+    </div>
+    <main class="container-fluid contenido">
+      <div th:replace="~{fragmentos/layout :: mensajes}">
+      </div>
+      <section class="bienvenida">
+        <div>
+          <p class="eyebrow">
+            BIENESTAR ANIMAL · RESUMEN DIARIO
+          </p>
+          <h1>
+            Un buen día para cuidar de ellos.
+          </h1>
+          <p>
+            Revisa de un vistazo el estado de tu tienda y mantén al día todo lo que las mascotas necesitan.
+          </p>
+        </div>
+        <img th:src="@{/img/mascotas.svg}" alt="Perro y gato" class="mascotas-dashboard">
+      </section>
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <article class="tarjeta-indicador">
+            <span class="icono-indicador" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                <path d="M3 6h18"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </span>
+            <p>
+              Productos registrados
+            </p>
+            <strong th:text="${totalProductos}">
+              0
+            </strong>
+          </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <article class="tarjeta-indicador">
+            <span class="icono-indicador" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </span>
+            <p>
+              Familias y clientes
+            </p>
+            <strong th:text="${totalClientes}">
+              0
+            </strong>
+          </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <article class="tarjeta-indicador">
+            <span class="icono-indicador" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="7" height="7" x="3" y="3" rx="2"/>
+                <rect width="7" height="7" x="14" y="3" rx="2"/>
+                <rect width="7" height="7" x="14" y="14" rx="2"/>
+                <rect width="7" height="7" x="3" y="14" rx="2"/>
+              </svg>
+            </span>
+            <p>
+              Categorías de cuidado
+            </p>
+            <strong th:text="${totalCategorias}">
+              0
+            </strong>
+          </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <article class="tarjeta-indicador">
+            <span class="icono-indicador alerta-suave" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                <path d="M12 9v4"/>
+                <path d="M12 17h.01"/>
+              </svg>
+            </span>
+            <p>
+              Productos por reponer
+            </p>
+            <strong th:text="${stockBajo}">
+              0
+            </strong>
+          </article>
+        </div>
+      </div>
+      <section class="panel d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+        <div>
+          <h2 class="mb-1">
+            Accesos rápidos
+          </h2>
+          <p class="text-secondary mb-0">
+            Información sincronizada en tiempo real con la base de datos de tu tienda.
+          </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-primary" th:href="@{/productos}">
+            Consultar productos
+          </a>
+          <a class="btn btn-outline-primary" th:href="@{/inventario}">
+            Revisar inventario
+          </a>
+          <a class="btn btn-outline-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos/nuevo}">
+            + Nuevo producto
+          </a>
+        </div>
+      </section>
+    </main>
+    <div th:replace="~{fragmentos/layout :: pie}">
+    </div>
+  </body>
+</html>

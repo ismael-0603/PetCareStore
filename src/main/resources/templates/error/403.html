@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  </head>
+  <body>
+    <div th:replace="~{fragmentos/layout :: menu}">
+    </div>
+    <main class="container-fluid contenido">
+      <div th:replace="~{fragmentos/layout :: mensajes}">
+      </div>
+      <section class="panel text-center py-5">
+        <p class="eyebrow">
+          ERROR 403
+        </p>
+        <h1>
+          Acceso restringido
+        </h1>
+        <p th:text="${mensaje != null ? mensaje : 'Tu cuenta no tiene permisos para realizar esta operación.'}">
+        </p>
+        <a class="btn btn-primary" th:href="@{/dashboard}">
+          Volver al inicio
+        </a>
+      </section>
+    </main>
+    <div th:replace="~{fragmentos/layout :: pie}">
+    </div>
+  </body>
+</html>

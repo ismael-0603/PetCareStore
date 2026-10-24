@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  </head>
+  <body>
+    <div th:replace="~{fragmentos/layout :: menu}">
+    </div>
+    <main class="container-fluid contenido">
+      <div th:replace="~{fragmentos/layout :: mensajes}">
+      </div>
+      <div class="cabecera-pagina">
+        <div>
+          <p class="eyebrow">
+            FAMILIAS &amp; TUTORES
+          </p>
+          <h1>
+            Clientes
+          </h1>
+        </div>
+        <a class="btn btn-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/clientes/nuevo}">
+          + Registrar cliente
+        </a>
+      </div>
+      <section class="panel p-0 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>
+                  ID
+                </th>
+                <th>
+                  Nombre
+                </th>
+                <th>
+                  Apellido
+                </th>
+                <th>
+                  Documento
+                </th>
+                <th>
+                  Teléfono
+                </th>
+                <th>
+                  Correo
+                </th>
+                <th>
+                  Dirección
+                </th>
+                <th>
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="r : ${registros}">
+                <td th:text="${r.id}">
+                </td>
+                <td class="fw-semibold" th:text="${r.nombre}">
+                </td>
+                <td th:text="${r.apellido}">
+                </td>
+                <td th:text="${r.documento}">
+                </td>
+                <td th:text="${r.telefono}">
+                </td>
+                <td th:text="${r.correo}">
+                </td>
+                <td th:text="${r.direccion}">
+                </td>
+                <td>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-sm btn-outline-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/clientes/editar/{id}(id=${r.id})}">
+                      Editar
+                    </a>
+                    <form sec:authorize="hasRole('ADMINISTRADOR')" th:action="@{/clientes/eliminar/{id}(id=${r.id})}" method="post" data-confirmar="¿Deseas eliminar este registro? Esta acción no se puede deshacer.">
+                      <button class="btn btn-sm btn-outline-danger">
+                        Eliminar
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(registros)}">
+                <td colspan="12" class="text-center py-5 text-secondary">
+                  No se encontraron registros.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <div th:replace="~{fragmentos/layout :: pie}">
+    </div>
+  </body>
+</html>

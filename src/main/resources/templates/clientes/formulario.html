@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  </head>
+  <body>
+    <div th:replace="~{fragmentos/layout :: menu}">
+    </div>
+    <main class="container-fluid contenido">
+      <div th:replace="~{fragmentos/layout :: mensajes}">
+      </div>
+      <div class="cabecera-pagina">
+        <div>
+          <p class="eyebrow">
+            PETCARE STORE
+          </p>
+          <h1 th:text="${cliente.id == null ? 'Registrar cliente' : 'Editar cliente'}">
+          </h1>
+        </div>
+      </div>
+      <section class="panel formulario-panel">
+        <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post">
+          <input type="hidden" th:field="*{id}">
+          <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+            <p class="mb-1">
+              Revisa los datos del formulario:
+            </p>
+            <ul class="mb-0">
+              <li th:each="err : ${#fields.allErrors()}" th:text="${err}">
+              </li>
+            </ul>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="nombre">
+                Nombre *
+              </label>
+              <input id="nombre" th:field="*{nombre}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="100">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="apellido">
+                Apellido *
+              </label>
+              <input id="apellido" th:field="*{apellido}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="100">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="documento">
+                Documento *
+              </label>
+              <input id="documento" th:field="*{documento}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="20">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="telefono">
+                Teléfono *
+              </label>
+              <input id="telefono" th:field="*{telefono}" type="tel" class="form-control" th:errorclass="is-invalid" required maxlength="20">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="correo">
+                Correo *
+              </label>
+              <input id="correo" th:field="*{correo}" type="email" class="form-control" th:errorclass="is-invalid" required maxlength="150">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="direccion">
+                Dirección *
+              </label>
+              <input id="direccion" th:field="*{direccion}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="250">
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary">
+              Guardar
+            </button>
+            <a class="btn btn-outline-secondary" th:href="@{/clientes}">
+              Cancelar
+            </a>
+          </div>
+        </form>
+      </section>
+    </main>
+    <div th:replace="~{fragmentos/layout :: pie}">
+    </div>
+  </body>
+</html>

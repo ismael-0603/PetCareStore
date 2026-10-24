@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragmentos/layout :: cabeza('Ingresar · PetCare Store')}">
+  </head>
+  <body class="login-fondo">
+    <div class="login-escena-fondo" aria-hidden="true">
+      <div class="halo-azul"></div>
+      <div class="halo-miel"></div>
+    </div>
+    <main class="login-contenedor">
+      <section class="login-presentacion">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <img class="marca-icono" th:src="@{/img/huella.svg}" width="52" height="52" alt="Huella">
+          <span class="eyebrow mb-0">
+            Cuidado &amp; Bienestar Animal
+          </span>
+        </div>
+        <h1>
+          Todo para ellos.
+          <br>
+          <span>Todo bajo control.</span>
+        </h1>
+        <p class="lead">
+          Gestiona productos, clientes e inventario en un espacio clínico, limpio y pensado para quienes cuidan de cada mascota.
+        </p>
+        <div class="pildoras-conexion">
+          <span class="pildora-animal">Nutrición &amp; salud</span>
+          <span class="pildora-animal">Accesorios selectos</span>
+          <span class="pildora-animal">Stock en tiempo real</span>
+        </div>
+        <img class="mascota-login" th:src="@{/img/mascotas.svg}" alt="Perro PetCare Store">
+      </section>
+      <section class="login-tarjeta">
+        <p class="eyebrow">
+          PETCARE STORE
+        </p>
+        <h2>
+          Inicia sesión
+        </h2>
+        <p class="text-secondary mb-4">
+          Ingresa con tu cuenta del equipo para continuar.
+        </p>
+        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+          Correo o contraseña incorrectos, o cuenta desactivada.
+        </div>
+        <div th:if="${param.logout}" class="alert alert-success">
+          Cerraste sesión correctamente.
+        </div>
+        <form th:action="@{/login}" method="post">
+          <div class="mb-3">
+            <label for="correo" class="form-label">
+              Correo electrónico
+            </label>
+            <input id="correo" name="correo" type="email" autocomplete="username" class="form-control" placeholder="nombre@petcarestore.com" required autofocus>
+          </div>
+          <div class="mb-4">
+            <label for="password" class="form-label">
+              Contraseña
+            </label>
+            <input id="password" name="password" type="password" autocomplete="current-password" class="form-control" placeholder="••••••••" required>
+          </div>
+          <button class="btn btn-primary w-100 py-2">
+            Ingresar al sistema
+          </button>
+        </form>
+        <p class="small text-secondary mt-4 mb-0 text-center">
+          Acceso exclusivo para el equipo de PetCare Store.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
