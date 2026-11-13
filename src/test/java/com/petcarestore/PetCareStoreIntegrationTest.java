@@ -1,5 +1,7 @@
 package com.petcarestore;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -459,6 +461,99 @@ class PetCareStoreIntegrationTest {
       productos.eliminar(productoId);
       categorias.eliminar(categoria.getId());
     }
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMINISTRADOR")
+  void listaPaginadaConModalYBusqueda() throws Exception {
+    for (int i = 0; i < 7; i++) {
+      Producto p = new Producto();
+      p.setNombre("Pagina " + i);
+      p.setCategoria(categoria);
+      p.setPrecio(BigDecimal.TEN);
+      p.setStock(1);
+      productoRepositorio.save(p);
+    }
+    var page = productos.filtrarPagina("pagina", null, null, null, null, 0, 5);
+    assertEquals(7, page.getTotalElements());
+    assertEquals(5, page.getContent().size());
+    assertEquals(2, page.getTotalPages());
+    mvc.perform(get("/productos").param("nombre", "pagina").param("pagina", "1"))
+        .andExpect(status().isOk())
+        .andExpect(model().attribute("paginaActual", 1))
+        .andExpect(content().string(containsString("modalProducto")));
+    mvc.perform(get("/productos").param("pagina", "-4")).andExpect(status().isOk());
+    mvc.perform(get("/productos").param("pagina", "999")).andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(roles = "EMPLEADO")
+  void empleadoNoVeModalDeRegistro() throws Exception {
+    mvc.perform(get("/productos"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(not(containsString("modalProducto"))));
+  }
+
+  @Test
+  @WithMockUser(roles = "EMPLEADO")
+  void exportaExcelConFiltros() throws Exception {
+    byte[] archivo =
+        mvc.perform(get("/productos/exportar/excel").param("nombre", "collar de prueba"))
+            .andExpect(status().isOk())
+            .andExpect(
+                header().string("Content-Disposition", containsString(".xlsx")))
+            .andReturn()
+            .getResponse()
+            .getContentAsByteArray();
+    try (var libro =
+        new org.apache.poi.xssf.usermodel.XSSFWorkbook(new java.io.ByteArrayInputStream(archivo))) {
+      var hoja = libro.getSheet("Productos");
+      assertEquals("Nombre", hoja.getRow(0).getCell(1).getStringCellValue());
+      assertEquals(1, hoja.getLastRowNum()); // encabezado + el único producto filtrado
+      assertEquals("Collar de prueba", hoja.getRow(1).getCell(1).getStringCellValue());
+      assertEquals(25.0, hoja.getRow(1).getCell(3).getNumericCellValue());
+    }
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMINISTRADOR")
+  void exportaPdfConVariasPaginasYCaracteresEspeciales() throws Exception {
+    for (int i = 0; i < 60; i++) { // más de una página A4
+      Producto p = new Producto();
+      p.setNombre("Juguete ñandú " + i + (i == 0 ? " 🐶" : ""));
+      p.setCategoria(categoria);
+      p.setPrecio(BigDecimal.ONE);
+      p.setStock(i);
+      productoRepositorio.save(p);
+    }
+    byte[] archivo =
+        mvc.perform(get("/productos/exportar/pdf"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/pdf"))
+            .andReturn()
+            .getResponse()
+            .getContentAsByteArray();
+    try (var pdf = org.apache.pdfbox.pdmodel.PDDocument.load(archivo)) {
+      assertTrue(pdf.getNumberOfPages() >= 2);
+      String texto = new org.apache.pdfbox.text.PDFTextStripper().getText(pdf);
+      assertTrue(texto.contains("Juguete ñandú 0"));
+      assertTrue(texto.contains("Collar de prueba"));
+    }
+  }
+
+  @Test
+  @WithMockUser(roles = "EMPLEADO")
+  void exportarConRangoInvalidoRedirigeConError() throws Exception {
+    mvc.perform(get("/productos/exportar/pdf").param("minimo", "10").param("maximo", "1"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/productos"))
+        .andExpect(flash().attributeExists("error"));
+  }
+
+  @Test
+  void anonimoNoExporta() throws Exception {
+    mvc.perform(get("/productos/exportar/excel")).andExpect(status().is3xxRedirection());
+    mvc.perform(get("/productos/exportar/pdf")).andExpect(status().is3xxRedirection());
   }
 
   private void autenticarHilo(String rol) {

@@ -3,9 +3,11 @@ package com.petcarestore.controlador;
 import com.petcarestore.modelo.*;
 import com.petcarestore.servicio.*;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -19,7 +21,7 @@ public class CategoriaControlador {
   }
 
   @InitBinder("categoria")
-  public void campos(org.springframework.web.bind.WebDataBinder binder) {
+  public void campos(WebDataBinder binder) {
     binder.setAllowedFields("id", "nombre", "descripcion", "estado");
   }
 
@@ -54,7 +56,7 @@ public class CategoriaControlador {
         return "redirect:/categorias";
       } catch (ReglaNegocioException e) {
         resultado.reject("negocio", e.getMessage());
-      } catch (org.springframework.dao.DataIntegrityViolationException e) {
+      } catch (DataIntegrityViolationException e) {
         resultado.reject("duplicado", "Los datos ya existen o tienen referencias asociadas.");
       }
     }
@@ -68,7 +70,7 @@ public class CategoriaControlador {
       mensajes.addFlashAttribute("exito", "Registro eliminado correctamente.");
     } catch (ReglaNegocioException e) {
       mensajes.addFlashAttribute("error", e.getMessage());
-    } catch (org.springframework.dao.DataIntegrityViolationException e) {
+    } catch (DataIntegrityViolationException e) {
       mensajes.addFlashAttribute(
           "error", "El registro tiene referencias asociadas y no se puede eliminar.");
     }

@@ -2,6 +2,8 @@ package com.petcarestore.servicio;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -28,10 +30,10 @@ public class ImagenServicio {
       if (!lectores.hasNext())
         throw new ReglaNegocioException("Seleccione una imagen JPG o PNG valida.");
       ImageReader lector = lectores.next();
-      String formato = lector.getFormatName().toLowerCase(java.util.Locale.ROOT);
+      String formato = lector.getFormatName().toLowerCase(Locale.ROOT);
       try {
         lector.setInput(entrada);
-        if (!java.util.Set.of("jpeg", "jpg", "png").contains(formato)
+        if (!Set.of("jpeg", "jpg", "png").contains(formato)
             || lector.getWidth(0) > 6000
             || lector.getHeight(0) > 6000)
           throw new ReglaNegocioException("Use JPG o PNG de hasta 6000 x 6000 pixeles.");

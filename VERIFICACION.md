@@ -1,5 +1,19 @@
 # Verificación de PetCare Store
 
+## Actualización del 11 de noviembre de 2026
+
+Cambios: paginación, modal de registro y exportación a Excel/PDF en productos; limpieza de código (`@Override`, imports en lugar de nombres completos, `DashboardServicio`, eliminación de `login-perro.jpg` y de `ProductoServicio.listar()`, que no se usaban).
+
+| Comprobación | Resultado |
+|---|---|
+| `mvnw clean test`, suite H2 de pruebas | BUILD SUCCESS; 32 pruebas, 0 fallos, 0 errores (26 anteriores + 6 nuevas) |
+| JDK usado en esta verificación | Microsoft OpenJDK 21 compilando con `release 17` (no se usó un JDK 17) |
+| Pruebas nuevas | Lista paginada con modal y búsqueda; empleado sin modal; Excel filtrado; PDF de varias páginas con tildes, ñ y emoji; rango de precios inválido al exportar; acceso anónimo rechazado |
+
+Pendiente de comprobar en este entorno: la suite contra MySQL, el recorrido en navegador de las nuevas funciones y nuevas capturas en `docs/capturas` (las actuales no muestran los botones de exportación).
+
+## Verificación inicial
+
 Fecha: 23 de octubre de 2026, America/Lima.
 
 ## Entorno utilizado

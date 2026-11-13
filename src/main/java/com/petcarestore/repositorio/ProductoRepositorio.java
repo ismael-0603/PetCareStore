@@ -1,26 +1,50 @@
 package com.petcarestore.repositorio;
 
 import com.petcarestore.modelo.Producto;
+import jakarta.persistence.LockModeType;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProductoRepositorio extends JpaRepository<Producto, Integer> {
+  // Condiciones de filtro compartidas por la consulta de lista y la de paginación.
+  String FILTRO =
+      " where (:nombre is null or lower(p.nombre) like lower(concat('%',:nombre,'%')))"
+          + " and (:categoria is null or p.categoria.id=:categoria)"
+          + " and (:disponible is null or (:disponible=true and p.stock>0)"
+          + " or (:disponible=false and p.stock=0))"
+          + " and (:minimo is null or p.precio>=:minimo)"
+          + " and (:maximo is null or p.precio<=:maximo)";
+
   boolean existsByCategoriaId(Integer categoriaId);
 
-  @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
-  @org.springframework.data.jpa.repository.Query("select p from Producto p where p.id=:id")
-  java.util.Optional<Producto> bloquearPorId(
-      @org.springframework.data.repository.query.Param("id") Integer id);
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select p from Producto p where p.id=:id")
+  Optional<Producto> bloquearPorId(@Param("id") Integer id);
 
-  @org.springframework.data.jpa.repository.Query(
-      "select p from Producto p where (:nombre is null or lower(p.nombre) like"
-          + " lower(concat('%',:nombre,'%'))) and (:categoria is null or p.categoria.id=:categoria)"
-          + " and (:disponible is null or (:disponible=true and p.stock>0) or (:disponible=false"
-          + " and p.stock=0)) and (:minimo is null or p.precio>=:minimo) and (:maximo is null or"
-          + " p.precio<=:maximo) order by p.id")
-  java.util.List<Producto> filtrar(
-      @org.springframework.data.repository.query.Param("nombre") String nombre,
-      @org.springframework.data.repository.query.Param("categoria") Integer categoria,
-      @org.springframework.data.repository.query.Param("disponible") Boolean disponible,
-      @org.springframework.data.repository.query.Param("minimo") java.math.BigDecimal minimo,
-      @org.springframework.data.repository.query.Param("maximo") java.math.BigDecimal maximo);
+  @Query("select p from Producto p" + FILTRO + " order by p.id")
+  List<Producto> filtrar(
+      @Param("nombre") String nombre,
+      @Param("categoria") Integer categoria,
+      @Param("disponible") Boolean disponible,
+      @Param("minimo") BigDecimal minimo,
+      @Param("maximo") BigDecimal maximo);
+
+  // Misma consulta, paginada (guía "Registro con modal, paginación y búsqueda").
+  @Query(
+      value = "select p from Producto p" + FILTRO + " order by p.id",
+      countQuery = "select count(p) from Producto p" + FILTRO)
+  Page<Producto> filtrarPagina(
+      @Param("nombre") String nombre,
+      @Param("categoria") Integer categoria,
+      @Param("disponible") Boolean disponible,
+      @Param("minimo") BigDecimal minimo,
+      @Param("maximo") BigDecimal maximo,
+      Pageable pageable);
 }

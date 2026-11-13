@@ -5,6 +5,9 @@ import com.petcarestore.repositorio.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,33 +17,66 @@ public class ProductoServicioImp implements ProductoServicio {
   private final ProductoRepositorio productos;
   private final CategoriaRepositorio categorias;
   private final InventarioRepositorio inventarios;
+  private final ReporteProductos reportes;
 
   public ProductoServicioImp(
       ProductoRepositorio productos,
       CategoriaRepositorio categorias,
-      InventarioRepositorio inventarios) {
+      InventarioRepositorio inventarios,
+      ReporteProductos reportes) {
     this.productos = productos;
     this.categorias = categorias;
     this.inventarios = inventarios;
+    this.reportes = reportes;
   }
 
-  public List<Producto> listar() {
-    return productos.findAll();
+  @Override
+  public byte[] exportarExcel(
+      String nombre, Integer categoria, Boolean disponible, BigDecimal minimo, BigDecimal maximo) {
+    return reportes.excel(filtrar(nombre, categoria, disponible, minimo, maximo));
   }
 
+  @Override
+  public byte[] exportarPdf(
+      String nombre, Integer categoria, Boolean disponible, BigDecimal minimo, BigDecimal maximo) {
+    return reportes.pdf(filtrar(nombre, categoria, disponible, minimo, maximo));
+  }
+
+  @Override
   public Producto buscarPorId(Integer id) {
     return productos.findById(id).orElseThrow(RegistroNoEncontradoException::new);
   }
 
+  @Override
   public List<Producto> filtrar(
       String nombre, Integer categoria, Boolean disponible, BigDecimal minimo, BigDecimal maximo) {
+    validarRango(minimo, maximo);
+    return productos.filtrar(nombre, categoria, disponible, minimo, maximo);
+  }
+
+  @Override
+  public Page<Producto> filtrarPagina(
+      String nombre,
+      Integer categoria,
+      Boolean disponible,
+      BigDecimal minimo,
+      BigDecimal maximo,
+      int pagina,
+      int tamano) {
+    validarRango(minimo, maximo);
+    // Se acota la página y el tamaño para que un parámetro manipulado no rompa la consulta.
+    Pageable pageable = PageRequest.of(Math.max(pagina, 0), Math.min(Math.max(tamano, 1), 50));
+    return productos.filtrarPagina(nombre, categoria, disponible, minimo, maximo, pageable);
+  }
+
+  private void validarRango(BigDecimal minimo, BigDecimal maximo) {
     if ((minimo != null && minimo.signum() < 0)
         || (maximo != null && maximo.signum() < 0)
         || (minimo != null && maximo != null && minimo.compareTo(maximo) > 0))
       throw new ReglaNegocioException("El rango de precios no es valido.");
-    return productos.filtrar(nombre, categoria, disponible, minimo, maximo);
   }
 
+  @Override
   @Transactional
   @PreAuthorize("hasRole('ADMINISTRADOR')")
   public Producto guardar(Producto datos) {
@@ -78,6 +114,7 @@ public class ProductoServicioImp implements ProductoServicio {
     return producto;
   }
 
+  @Override
   @Transactional
   @PreAuthorize("hasRole('ADMINISTRADOR')")
   public void eliminar(Integer id) {

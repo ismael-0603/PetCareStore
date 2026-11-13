@@ -1,9 +1,10 @@
 package com.petcarestore.servicio;
 
 import com.petcarestore.modelo.Categoria;
+import java.util.List;
 
 public interface CategoriaServicio {
-  java.util.List<Categoria> listar();
+  List<Categoria> listar();
 
   Categoria guardar(Categoria registro);
 

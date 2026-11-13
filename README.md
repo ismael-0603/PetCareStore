@@ -4,14 +4,14 @@ Aplicación académica de Lenguaje de Programación II: productos, categorías, 
 
 ## Tecnologías y organización
 
-Java 17, Spring Boot 3.5.7, Spring Web, Spring Data JPA, Spring Security, Thymeleaf, MySQL y Bootstrap 5.3.8. Maven administra las dependencias. No requiere Node.js.
+Java 17, Spring Boot 3.5.7, Spring Web, Spring Data JPA, Spring Security, Thymeleaf, MySQL, Bootstrap 5.3.8, Apache POI (Excel) y Apache PDFBox (PDF). Maven administra las dependencias. No requiere Node.js.
 
 ```text
 src/main/java/com/petcarestore/
   PetCareStoreApplication.java
   modelo/        Entidades JPA, constructores y accesores explícitos
   repositorio/   Interfaces JpaRepository
-  servicio/      Interfaces e implementaciones ServicioImp
+  servicio/      Interfaces e implementaciones ServicioImp; ReporteProductos genera Excel y PDF
   controlador/   Controladores MVC y manejo de errores
   configuracion/ Seguridad y recursos locales
 src/main/resources/
@@ -23,6 +23,15 @@ sql/petcare_db.sql
 ```
 
 Las vistas usan `listar.html` y `formulario.html`, reutilizando el formulario para registrar y editar. Las modificaciones usan POST y CSRF; el documento académico menciona React/API REST, pero esta implementación aplica la solicitud de Spring MVC con Thymeleaf.
+
+### Lista de productos
+
+Aplica las guías de Semana 11 y 12 y el manual de exportación (`Semana12Modal.zip`):
+
+- **Búsqueda y filtros:** nombre, categoría, disponibilidad y rango de precios, combinables.
+- **Paginación:** 5 productos por página; los enlaces conservan los filtros activos.
+- **Modal de registro:** el botón "+ Registrar producto" abre un formulario en ventana modal (solo administrador). Si hay errores de validación, se muestran en el formulario completo. `/productos/nuevo` sigue disponible.
+- **Exportar a Excel y PDF:** `/productos/exportar/excel` y `/productos/exportar/pdf` descargan los productos que cumplen los filtros activos (sin filtros, todos). Disponible para administrador y empleado.
 
 ## 1. Abrir en IntelliJ IDEA
 
@@ -93,6 +102,7 @@ Para generar el ejecutable: `mvnw.cmd package`. Después: `java -jar target/PetC
 |---|---|---|
 | Dashboard | Sí | Sí |
 | Consultar y filtrar productos | Sí | Sí |
+| Exportar productos a Excel y PDF | Sí | Sí |
 | Registrar, editar, eliminar productos | Sí | No |
 | Gestionar categorías, clientes y usuarios | Sí | No |
 | Consultar inventario y actualizar cantidad | Sí | Sí |
@@ -114,7 +124,7 @@ Spring Security protege las rutas y los servicios de escritura. Los botones refl
 
 1. Entrar como administrador y observar las cuatro tarjetas del dashboard.
 2. Crear una categoría y un producto, con stock 5 e imagen; comprobar que aparece en inventario con mínimo 10 y alerta STOCK BAJO.
-3. Editar el producto, buscarlo por nombre y combinar categoría, disponibilidad y precio.
+3. Editar el producto, buscarlo por nombre y combinar categoría, disponibilidad y precio. Con los filtros aplicados, pulsar **Exportar a Excel** y **Exportar a PDF** y comprobar que los archivos traen solo esos productos.
 4. Cambiar inventario a 15; comprobar el stock del producto y la desaparición de su alerta.
 5. Intentar eliminar la categoría mientras tiene productos y comprobar el aviso.
 6. Registrar, editar y eliminar un cliente; intentar duplicar su documento.
@@ -153,7 +163,8 @@ Las capturas de escritorio y móvil están en `docs/capturas`. Se obtuvieron de 
 - **Unsupported class version / release 17:** corregir JDK de proyecto, Maven Runner y JAVA_HOME.
 - **Access denied / Communications link failure:** comprobar servicio MySQL, puerto, usuario, contraseña y DB_URL.
 - **Schema validation / missing table:** ejecutar el SQL completo en la misma base indicada por DB_URL.
-- **Puerto 8081 ocupado:** detener la otra aplicación antes de iniciar PetCare Store.
+- **Puerto 8081 ocupado:** detener la otra aplicación antes de iniciar PetCare Store (en IntelliJ, revisar que no haya otra ejecución activa en la pestaña Run o Services).
+- **Aviso `HHH000511 ... version 5.5.5`:** indica que se está usando MariaDB (por ejemplo, el de XAMPP) en lugar de MySQL 8. La aplicación arranca, pero el entorno recomendado es MySQL 8.0.16 o superior.
 - **No se guarda una imagen:** comprobar permisos de PETCARE_UPLOAD_DIR y límites del archivo.
 - **403:** comprobar rol y sesión; los formularios deben enviarse desde la aplicación para incluir CSRF.
 

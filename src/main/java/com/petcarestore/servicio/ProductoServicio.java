@@ -1,20 +1,33 @@
 package com.petcarestore.servicio;
 
 import com.petcarestore.modelo.Producto;
+import java.math.BigDecimal;
+import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface ProductoServicio {
-  java.util.List<Producto> listar();
-
   Producto guardar(Producto registro);
 
   Producto buscarPorId(Integer id);
 
   void eliminar(Integer id);
 
-  java.util.List<Producto> filtrar(
+  List<Producto> filtrar(
+      String nombre, Integer categoria, Boolean disponible, BigDecimal minimo, BigDecimal maximo);
+
+  Page<Producto> filtrarPagina(
       String nombre,
       Integer categoria,
       Boolean disponible,
-      java.math.BigDecimal minimo,
-      java.math.BigDecimal maximo);
+      BigDecimal minimo,
+      BigDecimal maximo,
+      int pagina,
+      int tamano);
+
+  // Reportes: exportan los productos que cumplen los filtros (sin filtros, todos).
+  byte[] exportarExcel(
+      String nombre, Integer categoria, Boolean disponible, BigDecimal minimo, BigDecimal maximo);
+
+  byte[] exportarPdf(
+      String nombre, Integer categoria, Boolean disponible, BigDecimal minimo, BigDecimal maximo);
 }

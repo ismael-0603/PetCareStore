@@ -4,6 +4,7 @@ import com.petcarestore.modelo.*;
 import com.petcarestore.repositorio.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,14 +20,17 @@ public class InventarioServicioImp implements InventarioServicio {
     this.productos = productos;
   }
 
+  @Override
   public List<Inventario> listar() {
     return inventarios.findAll();
   }
 
+  @Override
   public Inventario buscarPorId(Integer id) {
     return inventarios.findById(id).orElseThrow(RegistroNoEncontradoException::new);
   }
 
+  @Override
   @Transactional
   @PreAuthorize("hasAnyRole('ADMINISTRADOR','EMPLEADO')")
   public void actualizar(Integer id, Integer cantidad, Integer stockMinimo) {
@@ -45,8 +49,7 @@ public class InventarioServicioImp implements InventarioServicio {
             .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
     if (stockMinimo != null) {
       if (!administrador)
-        throw new org.springframework.security.access.AccessDeniedException(
-            "Solo el administrador puede modificar el minimo.");
+        throw new AccessDeniedException("Solo el administrador puede modificar el minimo.");
       if (stockMinimo < 0)
         throw new ReglaNegocioException("El stock minimo no puede ser negativo.");
       inventario.setStockMinimo(stockMinimo);

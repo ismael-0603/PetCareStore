@@ -17,14 +17,17 @@ public class ClienteServicioImp implements ClienteServicio {
     this.productos = productos;
   }
 
+  @Override
   public List<Cliente> listar() {
     return repositorio.findAll();
   }
 
+  @Override
   public Cliente buscarPorId(Integer id) {
     return repositorio.findById(id).orElseThrow(RegistroNoEncontradoException::new);
   }
 
+  @Override
   @Transactional
   @PreAuthorize("hasRole('ADMINISTRADOR')")
   public Cliente guardar(Cliente registro) {
@@ -35,6 +38,7 @@ public class ClienteServicioImp implements ClienteServicio {
     return repositorio.save(registro);
   }
 
+  @Override
   @Transactional
   @PreAuthorize("hasRole('ADMINISTRADOR')")
   public void eliminar(Integer id) {

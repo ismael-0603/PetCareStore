@@ -2,7 +2,9 @@ package com.petcarestore.servicio;
 
 import com.petcarestore.modelo.*;
 import com.petcarestore.repositorio.UsuarioRepositorio;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,14 +21,17 @@ public class UsuarioServicioImp implements UsuarioServicio {
     this.encoder = encoder;
   }
 
+  @Override
   public List<Usuario> listar() {
     return repositorio.findAll();
   }
 
+  @Override
   public Usuario buscarPorId(Integer id) {
     return repositorio.findById(id).orElseThrow(RegistroNoEncontradoException::new);
   }
 
+  @Override
   @Transactional
   public Usuario guardar(Usuario datos) {
     List<Usuario> usuarios = repositorio.bloquearUsuarios();
@@ -37,7 +42,7 @@ public class UsuarioServicioImp implements UsuarioServicio {
                 .filter(u -> u.getId().equals(datos.getId()))
                 .findFirst()
                 .orElseThrow(RegistroNoEncontradoException::new);
-    String correo = datos.getCorreo().trim().toLowerCase(java.util.Locale.ROOT);
+    String correo = datos.getCorreo().trim().toLowerCase(Locale.ROOT);
     if (repositorio.existsByCorreoIgnoreCaseAndIdNot(
         correo, datos.getId() == null ? -1 : datos.getId()))
       throw new ReglaNegocioException("Ya existe un usuario con ese correo.");
@@ -52,7 +57,7 @@ public class UsuarioServicioImp implements UsuarioServicio {
     if (usuario.getId() == null && (nueva == null || nueva.isBlank()))
       throw new ReglaNegocioException("La contrasena es obligatoria para usuarios nuevos.");
     if (nueva != null && !nueva.isBlank()) {
-      if (nueva.length() < 8 || nueva.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
+      if (nueva.length() < 8 || nueva.getBytes(StandardCharsets.UTF_8).length > 72)
         throw new ReglaNegocioException(
             "La contrasena debe tener al menos 8 caracteres y como maximo 72 bytes.");
       usuario.setPassword(encoder.encode(nueva));

@@ -17,14 +17,17 @@ public class CategoriaServicioImp implements CategoriaServicio {
     this.productos = productos;
   }
 
+  @Override
   public List<Categoria> listar() {
     return repositorio.findAll();
   }
 
+  @Override
   public Categoria buscarPorId(Integer id) {
     return repositorio.findById(id).orElseThrow(RegistroNoEncontradoException::new);
   }
 
+  @Override
   @Transactional
   @PreAuthorize("hasRole('ADMINISTRADOR')")
   public Categoria guardar(Categoria registro) {
@@ -35,6 +38,7 @@ public class CategoriaServicioImp implements CategoriaServicio {
     return repositorio.save(registro);
   }
 
+  @Override
   @Transactional
   @PreAuthorize("hasRole('ADMINISTRADOR')")
   public void eliminar(Integer id) {

@@ -13,6 +13,7 @@ public class RecursosConfiguracion implements WebMvcConfigurer {
     this.directorio = directorio;
   }
 
+  @Override
   public void addResourceHandlers(ResourceHandlerRegistry registro) {
     registro
         .addResourceHandler("/imagenes/**")

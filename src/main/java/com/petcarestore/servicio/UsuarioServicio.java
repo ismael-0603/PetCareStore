@@ -1,9 +1,10 @@
 package com.petcarestore.servicio;
 
 import com.petcarestore.modelo.Usuario;
+import java.util.List;
 
 public interface UsuarioServicio {
-  java.util.List<Usuario> listar();
+  List<Usuario> listar();
 
   Usuario guardar(Usuario registro);
 

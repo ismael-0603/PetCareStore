@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -46,6 +47,8 @@ public class SeguridadConfiguracion {
                     .requestMatchers(
                         HttpMethod.GET,
                         "/productos",
+                        "/productos/exportar/excel",
+                        "/productos/exportar/pdf",
                         "/inventario",
                         "/inventario/editar/*",
                         "/imagenes/**",
@@ -72,9 +75,7 @@ public class SeguridadConfiguracion {
                       response.setStatus(403);
                       request.getRequestDispatcher("/error/403").forward(request, response);
                     }));
-    http.addFilterBefore(
-        new EstadoUsuarioFiltro(usuarios),
-        org.springframework.security.web.access.intercept.AuthorizationFilter.class);
+    http.addFilterBefore(new EstadoUsuarioFiltro(usuarios), AuthorizationFilter.class);
     return http.build();
   }
 }

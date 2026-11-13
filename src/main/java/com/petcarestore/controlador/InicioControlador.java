@@ -1,26 +1,18 @@
 package com.petcarestore.controlador;
 
-import com.petcarestore.repositorio.*;
+import com.petcarestore.servicio.DashboardServicio;
+import com.petcarestore.servicio.DashboardServicio.ResumenDashboard;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class InicioControlador {
-  private final ProductoRepositorio productos;
-  private final ClienteRepositorio clientes;
-  private final CategoriaRepositorio categorias;
-  private final InventarioRepositorio inventarios;
+  private final DashboardServicio dashboard;
 
-  public InicioControlador(
-      ProductoRepositorio productos,
-      ClienteRepositorio clientes,
-      CategoriaRepositorio categorias,
-      InventarioRepositorio inventarios) {
-    this.productos = productos;
-    this.clientes = clientes;
-    this.categorias = categorias;
-    this.inventarios = inventarios;
+  public InicioControlador(DashboardServicio dashboard) {
+    this.dashboard = dashboard;
   }
 
   @GetMapping("/login")
@@ -30,15 +22,16 @@ public class InicioControlador {
 
   @GetMapping({"/", "/dashboard"})
   public String dashboard(Model model) {
-    model.addAttribute("totalProductos", productos.count());
-    model.addAttribute("totalClientes", clientes.count());
-    model.addAttribute("totalCategorias", categorias.count());
-    model.addAttribute("stockBajo", inventarios.contarStockBajo());
+    ResumenDashboard resumen = dashboard.resumen();
+    model.addAttribute("totalProductos", resumen.totalProductos());
+    model.addAttribute("totalClientes", resumen.totalClientes());
+    model.addAttribute("totalCategorias", resumen.totalCategorias());
+    model.addAttribute("stockBajo", resumen.stockBajo());
     return "dashboard";
   }
 
   @GetMapping("/error/403")
-  public String denegado(jakarta.servlet.http.HttpServletResponse response) {
+  public String denegado(HttpServletResponse response) {
     response.setStatus(403);
     return "error/403";
   }

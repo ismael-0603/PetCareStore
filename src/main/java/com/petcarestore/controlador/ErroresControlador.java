@@ -3,7 +3,10 @@ package com.petcarestore.controlador;
 import com.petcarestore.servicio.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 public class ErroresControlador {
@@ -15,8 +18,8 @@ public class ErroresControlador {
   }
 
   @ExceptionHandler({
-    org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
-    org.springframework.web.bind.MissingServletRequestParameterException.class
+    MethodArgumentTypeMismatchException.class,
+    MissingServletRequestParameterException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public String datoInvalido(Exception e, Model model) {
@@ -26,7 +29,7 @@ public class ErroresControlador {
     return "error/400";
   }
 
-  @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public String imagenGrande(Exception e, Model model) {
     model.addAttribute(

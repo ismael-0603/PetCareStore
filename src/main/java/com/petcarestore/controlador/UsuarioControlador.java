@@ -3,9 +3,11 @@ package com.petcarestore.controlador;
 import com.petcarestore.modelo.*;
 import com.petcarestore.servicio.*;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -19,7 +21,7 @@ public class UsuarioControlador {
   }
 
   @InitBinder("usuario")
-  public void campos(org.springframework.web.bind.WebDataBinder binder) {
+  public void campos(WebDataBinder binder) {
     binder.setAllowedFields("id", "nombre", "correo", "nuevaPassword", "rol", "estado");
   }
 
@@ -56,7 +58,7 @@ public class UsuarioControlador {
         return "redirect:/usuarios";
       } catch (ReglaNegocioException e) {
         resultado.reject("negocio", e.getMessage());
-      } catch (org.springframework.dao.DataIntegrityViolationException e) {
+      } catch (DataIntegrityViolationException e) {
         resultado.reject("duplicado", "Los datos ya existen o tienen referencias asociadas.");
       }
     }
