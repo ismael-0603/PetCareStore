@@ -15,7 +15,7 @@
       <nav class="navbar navbar-expand-lg barra">
         <div class="container-fluid px-2">
           <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/dashboard}">
-            <img class="marca-icono" th:src="@{/img/huella.svg}" width="34" height="34" alt="">
+            <img class="marca-icono" th:src="@{/img/huella.svg}" width="34" height="34" alt="PetCare Store">
             <span>PetCare <strong>Store</strong></span>
           </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navegacion" aria-controls="navegacion" aria-expanded="false" aria-label="Abrir menú">
@@ -36,23 +36,31 @@
                 Clientes
               </a>
               <a class="nav-link" th:href="@{/inventario}">
-                Inventario
+                <span>Inventario</span>
+                <span th:if="${alertasInventario != null and alertasInventario > 0}" class="nav-alerta-badge" th:text="${alertasInventario}" title="Productos con stock bajo">
+                  0
+                </span>
               </a>
               <a class="nav-link" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/usuarios}">
                 Usuarios
               </a>
             </div>
             <div class="sesion">
-              <span class="sesion-usuario" sec:authentication="name"></span>
-              <span class="badge rol-pildora" sec:authorize="hasRole('ADMINISTRADOR')">
-                Administrador
-              </span>
-              <span class="badge rol-pildora" sec:authorize="hasRole('EMPLEADO')">
-                Empleado
-              </span>
+              <span class="sesion-avatar" aria-hidden="true" sec:authorize="hasRole('ADMINISTRADOR')">AD</span>
+              <span class="sesion-avatar" aria-hidden="true" sec:authorize="hasRole('EMPLEADO')">EM</span>
+              <div class="sesion-info">
+                <span class="sesion-usuario" sec:authentication="name"></span>
+                <span class="rol-texto" sec:authorize="hasRole('ADMINISTRADOR')">Administrador</span>
+                <span class="rol-texto" sec:authorize="hasRole('EMPLEADO')">Empleado</span>
+              </div>
               <form th:action="@{/logout}" method="post" class="d-inline">
                 <button class="btn btn-salir btn-sm">
-                  Salir
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  <span>Salir</span>
                 </button>
               </form>
             </div>
@@ -60,20 +68,60 @@
         </div>
       </nav>
     </header>
+
     <div th:fragment="mensajes">
-      <div th:if="${exito}" class="alert alert-success mb-4" role="status" th:text="${exito}">
+      <div th:if="${exito}" class="alert alert-success alert-dismissible fade show mb-4" role="status">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+        <span th:text="${exito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
       </div>
-      <div th:if="${error}" class="alert alert-danger mb-4" role="alert" th:text="${error}">
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
       </div>
     </div>
+
     <footer th:fragment="pie" class="pie">
+      <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-labelledby="modalConfirmarTitulo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content text-start">
+            <div class="modal-header">
+              <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:36px;height:36px;background:#feeceb;color:#b42318;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </span>
+                <h2 class="modal-title h6 mb-0 fw-bold" id="modalConfirmarTitulo">Confirmar eliminación</h2>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+              <p id="modalConfirmarTexto" class="mb-0 text-secondary">¿Deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" id="modalConfirmarBtn" class="btn btn-danger btn-sm">Sí, eliminar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <span>
         PetCare Store · Bienestar y cuidado animal en cada detalle
       </span>
-      <script th:src="@{/vendor/bootstrap.bundle.min.js}">
-      </script>
-      <script th:src="@{/js/app.js}">
-      </script>
+      <script th:src="@{/vendor/bootstrap.bundle.min.js}"></script>
+      <script th:src="@{/js/app.js}"></script>
     </footer>
   </body>
 </html>

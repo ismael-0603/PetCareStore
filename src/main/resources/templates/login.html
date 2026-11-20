@@ -25,10 +25,10 @@
         </p>
         <div class="pildoras-conexion">
           <span class="pildora-animal">Nutrición &amp; salud</span>
-          <span class="pildora-animal">Accesorios selectos</span>
+          <span class="pildora-animal">Reportes Excel y PDF</span>
           <span class="pildora-animal">Stock en tiempo real</span>
         </div>
-        <img class="mascota-login" th:src="@{/img/mascotas.svg}" alt="Perro PetCare Store">
+        <img class="mascota-login" th:src="@{/img/mascotas.svg}" alt="Mascotas PetCare Store">
       </section>
       <section class="login-tarjeta">
         <p class="eyebrow">
@@ -41,10 +41,19 @@
           Ingresa con tu cuenta del equipo para continuar.
         </p>
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
-          Correo o contraseña incorrectos, o cuenta desactivada.
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="flex-shrink-0">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>Correo o contraseña incorrectos, o cuenta desactivada.</span>
         </div>
-        <div th:if="${param.logout}" class="alert alert-success">
-          Cerraste sesión correctamente.
+        <div th:if="${param.logout}" class="alert alert-success" role="status">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="flex-shrink-0">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+          <span>Cerraste sesión correctamente.</span>
         </div>
         <form th:action="@{/login}" method="post">
           <div class="mb-3">
@@ -57,7 +66,15 @@
             <label for="password" class="form-label">
               Contraseña
             </label>
-            <input id="password" name="password" type="password" autocomplete="current-password" class="form-control" placeholder="••••••••" required>
+            <div class="campo-password">
+              <input id="password" name="password" type="password" autocomplete="current-password" class="form-control" placeholder="••••••••" required>
+              <button type="button" class="btn-ojo" data-toggle-password="password" aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
           </div>
           <button class="btn btn-primary w-100 py-2">
             Ingresar al sistema
@@ -68,5 +85,6 @@
         </p>
       </section>
     </main>
+    <script th:src="@{/js/app.js}"></script>
   </body>
 </html>

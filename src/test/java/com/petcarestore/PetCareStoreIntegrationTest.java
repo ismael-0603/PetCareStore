@@ -11,9 +11,12 @@ import com.petcarestore.modelo.*;
 import com.petcarestore.repositorio.*;
 import com.petcarestore.servicio.*;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -28,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("test")
 @Transactional
 class PetCareStoreIntegrationTest {
+  @Value("${petcare.imagenes.directorio}") Path directorioImagenes;
   @Autowired MockMvc mvc;
   @Autowired ProductoServicio productos;
   @Autowired CategoriaServicio categorias;
@@ -303,7 +307,7 @@ class PetCareStoreIntegrationTest {
               new MockMultipartFile(
                   "archivo", "foto." + formato, "image/" + formato, buffer.toByteArray()));
       assertTrue(nombre.endsWith("." + formato));
-      assertTrue(java.nio.file.Files.exists(java.nio.file.Path.of("target/test-uploads", nombre)));
+      assertTrue(java.nio.file.Files.exists(directorioImagenes.resolve(nombre)));
     }
   }
 
@@ -554,6 +558,103 @@ class PetCareStoreIntegrationTest {
   void anonimoNoExporta() throws Exception {
     mvc.perform(get("/productos/exportar/excel")).andExpect(status().is3xxRedirection());
     mvc.perform(get("/productos/exportar/pdf")).andExpect(status().is3xxRedirection());
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMINISTRADOR")
+  void telefonoDeClienteExigeNueveDigitos() throws Exception {
+    for (String telefono : List.of("------", "12345678", "1234567890")) {
+      mvc.perform(post("/clientes/guardar").with(csrf()).param("nombre", "Ana")
+              .param("apellido", "Rojas").param("documento", "12345678").param("direccion", "Lima")
+              .param("correo", "ana@example.com").param("telefono", telefono))
+          .andExpect(model().attributeHasFieldErrors("cliente", "telefono"));
+    }
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMINISTRADOR")
+  void correoDeClienteEsUnicoInclusoConMayusculas() {
+    Cliente c = new Cliente();
+    c.setNombre("Ana");
+    c.setApellido("Rojas");
+    c.setDocumento("12345678");
+    c.setTelefono("987654321");
+    c.setDireccion("Lima");
+    c.setCorreo("ana@example.com");
+    clientes.guardar(c);
+    clientes.guardar(c);
+    Cliente otro = new Cliente();
+    otro.setDocumento("87654321");
+    otro.setCorreo("ANA@example.com");
+    assertThrows(ReglaNegocioException.class, () -> clientes.guardar(otro));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMINISTRADOR")
+  void eliminarUltimoResultadoRecuperaLaPaginaFiltrada() throws Exception {
+    for (int i = 0; i < 6; i++) {
+      Producto p = new Producto();
+      p.setCategoria(categoria);
+      p.setPrecio(BigDecimal.ONE);
+      p.setNombre("Página filtrada " + i);
+      productos.guardar(p);
+    }
+    var ultima = productos.filtrarPagina("filtrada", categoria.getId(), null, null, null, 1, 5);
+    var vuelta = mvc.perform(post("/productos/eliminar/" + ultima.getContent().get(0).getId())
+            .with(csrf()).param("pagina", "1").param("nombre", "filtrada")
+            .param("categoria", categoria.getId().toString()))
+        .andExpect(status().is3xxRedirection())
+        .andReturn().getResponse().getRedirectedUrl();
+    mvc.perform(get(vuelta)).andExpect(model().attribute("paginaActual", 0))
+        .andExpect(model().attribute("nombre", "filtrada"))
+        .andExpect(model().attribute("categoriaFiltro", categoria.getId()));
+    var pagina = productos.filtrarPagina("filtrada", categoria.getId(), null, null, null, 1, 5);
+    assertEquals(0, pagina.getNumber());
+    assertEquals(5, pagina.getNumberOfElements());
+    assertTrue(productos.filtrarPagina("ausente", null, null, null, null, 99, 5).isEmpty());
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMINISTRADOR")
+  void rollbackRetiraSoloLaImagenNueva() throws Exception {
+    var buffer = new java.io.ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(2, 2,
+        java.awt.image.BufferedImage.TYPE_INT_RGB), "png", buffer);
+    var archivo = new MockMultipartFile("archivo", "foto.png", "image/png", buffer.toByteArray());
+    var tx = new org.springframework.transaction.support.TransactionTemplate(transacciones);
+    tx.setPropagationBehavior(org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    Producto invalido = new Producto();
+    invalido.setNombre("Producto inválido");
+    invalido.setPrecio(BigDecimal.ONE);
+    Categoria inexistente = new Categoria();
+    inexistente.setId(-1);
+    invalido.setCategoria(inexistente);
+    assertThrows(RegistroNoEncontradoException.class,
+        () -> tx.executeWithoutResult(estado -> productos.guardarConImagen(invalido, archivo)));
+    assertNotNull(invalido.getImagen());
+    assertFalse(java.nio.file.Files.exists(directorioImagenes.resolve(invalido.getImagen())));
+
+    Producto edicion = new Producto();
+    edicion.setId(producto.getId());
+    edicion.setNombre("Foto");
+    edicion.setCategoria(categoria);
+    edicion.setPrecio(BigDecimal.TEN);
+    String guardada = productos.guardarConImagen(edicion, archivo).getImagen();
+    assertEquals(guardada, productos.guardarConImagen(edicion, null).getImagen());
+    assertTrue(java.nio.file.Files.exists(directorioImagenes.resolve(guardada)));
+  }
+
+  @Test
+  void reporteRecortaNombreAnchoConservandoCategoriaYPrecio() throws Exception {
+    producto.setNombre("W".repeat(40));
+    categoria.setNombre("Higiénicos");
+    byte[] archivo = new ReporteProductos().pdf(List.of(producto));
+    try (var pdf = org.apache.pdfbox.pdmodel.PDDocument.load(archivo)) {
+      String texto = new org.apache.pdfbox.text.PDFTextStripper().getText(pdf);
+      assertTrue(texto.contains("W".repeat(19) + "…"));
+      assertTrue(texto.contains("Higiénicos"));
+      assertTrue(texto.contains("25.00"));
+    }
   }
 
   private void autenticarHilo(String rol) {

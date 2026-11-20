@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('Inventario · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -8,80 +8,112 @@
     <main class="container-fluid contenido">
       <div th:replace="~{fragmentos/layout :: mensajes}">
       </div>
+
       <div class="cabecera-pagina">
         <div>
           <p class="eyebrow">
             ABASTECIMIENTO EN TIEMPO REAL
           </p>
-          <h1>
-            Inventario
-          </h1>
+          <h1>Inventario</h1>
+        </div>
+        <div class="filtro-segmentado" role="group" aria-label="Filtrar estado de inventario">
+          <button type="button" class="btn-seg active" data-inv-filtro="todos">Todos</button>
+          <button type="button" class="btn-seg seg-alerta" data-inv-filtro="bajo">Stock bajo</button>
+          <button type="button" class="btn-seg seg-ok" data-inv-filtro="normal">Normal</button>
         </div>
       </div>
-      <section class="panel p-0 overflow-hidden">
+
+      <!-- Vista Escritorio -->
+      <section class="panel-datos p-0 overflow-hidden d-none d-md-block">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
-                <th>
-                  ID
-                </th>
-                <th>
-                  Producto
-                </th>
-                <th>
-                  Categoría
-                </th>
-                <th>
-                  Stock actual
-                </th>
-                <th>
-                  Stock mínimo
-                </th>
-                <th>
-                  Actualización
-                </th>
-                <th>
-                  Estado
-                </th>
-                <th>
-                  Acciones
-                </th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Nivel de stock</th>
+                <th>Actualización</th>
+                <th>Estado</th>
+                <th class="text-end">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr th:each="r : ${registros}">
-                <td th:text="${r.id}">
-                </td>
-                <td class="fw-semibold" th:text="${r.producto.nombre}">
-                </td>
-                <td th:text="${r.producto.categoria.nombre}">
-                </td>
-                <td th:text="${r.cantidad}">
-                </td>
-                <td th:text="${r.stockMinimo}">
-                </td>
-                <td th:text="${#temporals.format(r.fechaActualizacion,'dd/MM/yyyy HH:mm')}">
-                </td>
+              <tr th:each="r : ${registros}" th:attr="data-inv-estado=${r.stockBajo ? 'bajo' : 'normal'}">
                 <td>
-                  <span class="badge" th:classappend="${r.stockBajo ? 'text-bg-warning' : 'text-bg-success'}" th:text="${r.stockBajo ? 'STOCK BAJO' : 'NORMAL'}">
-                  </span>
-                </td>
-                <td>
-                  <div class="d-flex gap-2 flex-wrap">
-                    <a class="btn btn-sm btn-outline-primary" th:href="@{/inventario/editar/{id}(id=${r.id})}">
-                      Actualizar
-                    </a>
+                  <div class="d-flex align-items-center gap-3">
+                    <img class="producto-miniatura-sm" th:src="@{${r.producto.imagenUrl}}" th:alt="${r.producto.nombre}">
+                    <div>
+                      <div class="fw-bold" th:text="${r.producto.nombre}">Producto</div>
+                      <div class="small text-secondary tabular" th:text="${'ID #' + r.id}">#1</div>
+                    </div>
                   </div>
+                </td>
+                <td>
+                  <span class="badge pildora-categoria" th:text="${r.producto.categoria.nombre}">Categoría</span>
+                </td>
+                <td style="min-width: 195px;">
+                  <div class="d-flex justify-content-between small mb-1 tabular">
+                    <span class="fw-bold" th:style="${r.cantidad == 0 ? 'color:#b42318' : (r.stockBajo ? 'color:#9a5210' : 'color:#0A66C2')}" th:text="${r.cantidad + ' uds'}">0 uds</span>
+                    <span class="text-secondary" th:text="${'Mín. ' + r.stockMinimo}">Mín. 10</span>
+                  </div>
+                  <div class="barra-stock">
+                    <div class="barra-stock-relleno"
+                         th:classappend="${r.cantidad == 0 ? 'agotado' : (r.stockBajo ? 'bajo' : 'ok')}"
+                         th:style="'width:' + ${r.porcentajeStock} + '%'"></div>
+                  </div>
+                </td>
+                <td class="small text-secondary tabular text-nowrap" th:text="${#temporals.format(r.fechaActualizacion,'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                  <span class="badge" th:classappend="${r.stockBajo ? 'text-bg-warning' : 'text-bg-success'}" th:text="${r.stockBajo ? 'STOCK BAJO' : 'NORMAL'}"></span>
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" th:href="@{/inventario/editar/{id}(id=${r.id})}">
+                    Actualizar
+                  </a>
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(registros)}">
-                <td colspan="12" class="text-center py-5 text-secondary">
+                <td colspan="6" class="text-center py-5 text-secondary">
                   No se encontraron registros.
+                </td>
+              </tr>
+              <tr id="invVacioFiltro" class="d-none">
+                <td colspan="6" class="text-center py-5 text-secondary">
+                  No hay productos en este estado de inventario.
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- Vista Móvil -->
+      <section class="d-md-none d-flex flex-column gap-3">
+        <article class="lista-movil-card" th:each="r : ${registros}" th:attr="data-inv-estado=${r.stockBajo ? 'bajo' : 'normal'}">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <img class="producto-miniatura-sm" th:src="@{${r.producto.imagenUrl}}" th:alt="${r.producto.nombre}">
+            <div class="flex-grow-1 min-w-0">
+              <div class="fw-bold text-truncate" th:text="${r.producto.nombre}">Producto</div>
+              <div class="small text-secondary" th:text="${r.producto.categoria.nombre}">Categoría</div>
+            </div>
+            <span class="badge" th:classappend="${r.stockBajo ? 'text-bg-warning' : 'text-bg-success'}" th:text="${r.stockBajo ? 'STOCK BAJO' : 'NORMAL'}"></span>
+          </div>
+          <div class="d-flex justify-content-between small mb-1 tabular">
+            <span class="fw-bold" th:text="${r.cantidad + ' uds disponibles'}">0</span>
+            <span class="text-secondary" th:text="${'Mín. ' + r.stockMinimo}">Mín. 10</span>
+          </div>
+          <div class="barra-stock" style="max-width:none;">
+            <div class="barra-stock-relleno"
+                 th:classappend="${r.cantidad == 0 ? 'agotado' : (r.stockBajo ? 'bajo' : 'ok')}"
+                 th:style="'width:' + ${r.porcentajeStock} + '%'"></div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+            <span class="small text-secondary tabular" th:text="${#temporals.format(r.fechaActualizacion,'dd/MM/yyyy HH:mm')}"></span>
+            <a class="btn btn-sm btn-outline-primary" th:href="@{/inventario/editar/{id}(id=${r.id})}">Actualizar</a>
+          </div>
+        </article>
+        <div th:if="${#lists.isEmpty(registros)}" class="panel-datos text-center py-5 text-secondary">
+          No se encontraron registros.
         </div>
       </section>
     </main>

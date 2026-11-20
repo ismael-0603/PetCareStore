@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('Categorías · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -10,72 +10,69 @@
       </div>
       <div class="cabecera-pagina">
         <div>
-          <p class="eyebrow">
-            LÍNEAS DE CUIDADO ANIMAL
-          </p>
-          <h1>
-            Categorías
-          </h1>
+          <p class="eyebrow">LÍNEAS DE CUIDADO ANIMAL</p>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h1>Categorías</h1>
+            <span class="conteo-pildora" th:text="${#lists.size(registros) + (#lists.size(registros) == 1 ? ' categoría' : ' categorías')}">0</span>
+          </div>
         </div>
         <a class="btn btn-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/categorias/nuevo}">
           + Registrar categoría
         </a>
       </div>
-      <section class="panel p-0 overflow-hidden">
+
+      <section class="panel-datos p-0 overflow-hidden d-none d-md-block">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
-                <th>
-                  ID
-                </th>
-                <th>
-                  Nombre
-                </th>
-                <th>
-                  Descripción
-                </th>
-                <th>
-                  Estado
-                </th>
-                <th>
-                  Acciones
-                </th>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th class="text-end">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr th:each="r : ${registros}">
-                <td th:text="${r.id}">
-                </td>
-                <td class="fw-semibold" th:text="${r.nombre}">
-                </td>
-                <td th:text="${r.descripcion}">
-                </td>
+                <td class="text-secondary tabular" th:text="${'#' + r.id}"></td>
+                <td class="fw-bold" th:text="${r.nombre}"></td>
+                <td class="text-secondary" th:text="${r.descripcion}"></td>
                 <td>
-                  <span class="badge" th:classappend="${r.estado ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${r.estado ? 'Activo' : 'Inactivo'}">
-                  </span>
+                  <span class="badge" th:classappend="${r.estado ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${r.estado ? 'Activo' : 'Inactivo'}"></span>
                 </td>
-                <td>
-                  <div class="d-flex gap-2 flex-wrap">
-                    <a class="btn btn-sm btn-outline-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/categorias/editar/{id}(id=${r.id})}">
-                      Editar
-                    </a>
-                    <form sec:authorize="hasRole('ADMINISTRADOR')" th:action="@{/categorias/eliminar/{id}(id=${r.id})}" method="post" data-confirmar="¿Deseas eliminar este registro? Esta acción no se puede deshacer.">
-                      <button class="btn btn-sm btn-outline-danger">
-                        Eliminar
-                      </button>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                    <a class="btn btn-sm btn-outline-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/categorias/editar/{id}(id=${r.id})}">Editar</a>
+                    <form sec:authorize="hasRole('ADMINISTRADOR')" th:action="@{/categorias/eliminar/{id}(id=${r.id})}" method="post" th:attr="data-confirmar=${'¿Deseas eliminar la categoría «' + r.nombre + '»? Esta acción no se puede deshacer.'}">
+                      <button class="btn btn-sm btn-outline-danger">Eliminar</button>
                     </form>
                   </div>
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(registros)}">
-                <td colspan="12" class="text-center py-5 text-secondary">
-                  No se encontraron registros.
-                </td>
+                <td colspan="5" class="text-center py-5 text-secondary">No se encontraron registros.</td>
               </tr>
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section class="d-md-none d-flex flex-column gap-3">
+        <article class="lista-movil-card" th:each="r : ${registros}">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+            <h2 class="h6 fw-bold mb-0" th:text="${r.nombre}"></h2>
+            <span class="badge" th:classappend="${r.estado ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${r.estado ? 'Activo' : 'Inactivo'}"></span>
+          </div>
+          <p class="small text-secondary mb-0" th:text="${r.descripcion}"></p>
+          <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top" sec:authorize="hasRole('ADMINISTRADOR')">
+            <a class="btn btn-sm btn-outline-primary" th:href="@{/categorias/editar/{id}(id=${r.id})}">Editar</a>
+            <form th:action="@{/categorias/eliminar/{id}(id=${r.id})}" method="post" th:attr="data-confirmar=${'¿Deseas eliminar la categoría «' + r.nombre + '»? Esta acción no se puede deshacer.'}">
+              <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+            </form>
+          </div>
+        </article>
+        <div th:if="${#lists.isEmpty(registros)}" class="panel-datos text-center py-5 text-secondary">No se encontraron registros.</div>
       </section>
     </main>
     <div th:replace="~{fragmentos/layout :: pie}">

@@ -25,7 +25,7 @@ public class SeguridadConfiguracion {
         repositorio
             .findByCorreoIgnoreCase(correo.trim())
             .map(u -> new UsuarioAutenticado(u))
-            .orElseThrow(() -> new UsernameNotFoundException("Credenciales invalidas"));
+            .orElseThrow(() -> new UsernameNotFoundException("Credenciales inválidas"));
   }
 
   @Bean

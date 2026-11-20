@@ -22,7 +22,7 @@ src/test/        Pruebas de integración y perfil exclusivo de pruebas
 sql/petcare_db.sql
 ```
 
-Las vistas usan `listar.html` y `formulario.html`, reutilizando el formulario para registrar y editar. Las modificaciones usan POST y CSRF; el documento académico menciona React/API REST, pero esta implementación aplica la solicitud de Spring MVC con Thymeleaf.
+Las vistas usan `listar.html` y `formulario.html`, reutilizando el formulario para registrar y editar. Las modificaciones usan formularios POST con protección CSRF. Spring MVC entrega páginas HTML generadas con Thymeleaf y archivos para las exportaciones.
 
 ### Lista de productos
 
@@ -85,7 +85,7 @@ sh mvnw clean verify
 sh mvnw spring-boot:run
 ```
 
-Para generar el ejecutable: `mvnw.cmd package`. Después: `java -jar target/PetCareStore-1.0.0.jar`.
+Para generar el ejecutable: `mvnw.cmd package`. Después: `java -jar .build/PetCareStore-1.0.0.jar`. Maven guarda allí sus archivos generados. En IntelliJ, usar **Reload All Maven Projects** después de cambiar el directorio de compilación.
 
 ## 5. Credenciales de demostración
 
@@ -117,7 +117,7 @@ Spring Security protege las rutas y los servicios de escritura. Los botones refl
 - El stock mínimo inicial es 10. Stock bajo significa cantidad estrictamente menor al mínimo; cero es una cantidad válida. Disponibilidad significa stock mayor que cero, independientemente de si el producto está activo.
 - Los filtros se combinan y aceptan límites de precio inclusivos. Los rangos invertidos muestran un error.
 - Una categoría con productos no puede eliminarse. Al eliminar un producto se elimina también su inventario.
-- Correo de usuario, nombre de categoría y documento de cliente son únicos. Los precios usan decimal de dos posiciones; no se aceptan valores negativos.
+- Los clientes deben tener un teléfono de nueve dígitos. El documento y el correo son únicos entre clientes. Para bases existentes, revisar los duplicados y teléfonos anteriores con `sql/migraciones/001_correo_unico_cliente.sql` antes de aplicar su restricción. El correo de usuario y el nombre de categoría también son únicos. Los precios usan decimal de dos posiciones; no se aceptan valores negativos.
 - El dashboard cuenta todos los productos, categorías y clientes, incluidos los inactivos, y calcula sus valores desde la base en cada consulta.
 
 ## 6. Guion de demostración

@@ -40,8 +40,9 @@ CREATE TABLE IF NOT EXISTS cliente (
  apellido VARCHAR(100) NOT NULL,
  documento VARCHAR(20) NOT NULL UNIQUE,
  telefono VARCHAR(20) NOT NULL,
- correo VARCHAR(150) NOT NULL,
- direccion VARCHAR(250) NOT NULL
+ correo VARCHAR(150) NOT NULL UNIQUE,
+ direccion VARCHAR(250) NOT NULL,
+ CONSTRAINT ck_cliente_telefono CHECK (CHAR_LENGTH(telefono) = 9 AND telefono NOT REGEXP '[^0-9]')
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS inventario (
@@ -132,14 +133,14 @@ SELECT p.id_producto, p.stock, 10, NOW()
 FROM producto p
 WHERE NOT EXISTS (SELECT 1 FROM inventario i WHERE i.id_producto = p.id_producto);
 
--- 5. Clientes de demostración: se valida por 'documento' (UNIQUE) para evitar duplicados.
+-- 5. Omitir el ejemplo si ya existe un cliente con ese documento o correo.
 INSERT INTO cliente (nombre, apellido, documento, telefono, correo, direccion)
 SELECT 'María', 'Torres', '45678901', '987654321', 'maria.torres@example.com', 'Av. Las Flores 123, Lima'
-WHERE NOT EXISTS (SELECT 1 FROM cliente WHERE documento = '45678901');
+WHERE NOT EXISTS (SELECT 1 FROM cliente WHERE documento = '45678901' OR correo = 'maria.torres@example.com');
 
 INSERT INTO cliente (nombre, apellido, documento, telefono, correo, direccion)
 SELECT 'Carlos', 'Rojas', '45678902', '987654322', 'carlos.rojas@example.com', 'Jr. Los Olivos 456, Lima'
-WHERE NOT EXISTS (SELECT 1 FROM cliente WHERE documento = '45678902');
+WHERE NOT EXISTS (SELECT 1 FROM cliente WHERE documento = '45678902' OR correo = 'carlos.rojas@example.com');
 
 -- Confirma y guarda permanentemente todos los registros insertados en la transacción.
 COMMIT;

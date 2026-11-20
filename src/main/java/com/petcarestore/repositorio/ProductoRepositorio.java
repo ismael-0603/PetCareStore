@@ -47,4 +47,11 @@ public interface ProductoRepositorio extends JpaRepository<Producto, Integer> {
       @Param("minimo") BigDecimal minimo,
       @Param("maximo") BigDecimal maximo,
       Pageable pageable);
+
+  long countByEstadoTrue();
+
+  @Query(
+      "select c.nombre, count(p.id) from Categoria c left join Producto p on p.categoria.id = c.id"
+          + " group by c.id, c.nombre order by count(p.id) desc, c.nombre asc")
+  List<Object[]> contarPorCategoria();
 }

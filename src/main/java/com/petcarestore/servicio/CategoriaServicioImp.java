@@ -45,7 +45,7 @@ public class CategoriaServicioImp implements CategoriaServicio {
     buscarPorId(id);
     if (productos.existsByCategoriaId(id))
       throw new ReglaNegocioException(
-          "La categoria tiene productos asociados. Reasignelos antes de eliminarla.");
+          "La categoría tiene productos asociados. Reasígnelos antes de eliminarla.");
     repositorio.deleteById(id);
   }
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('Productos · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -8,22 +8,35 @@
     <main class="container-fluid contenido">
       <div th:replace="~{fragmentos/layout :: mensajes}">
       </div>
+
       <div class="cabecera-pagina">
         <div>
           <p class="eyebrow">
             CATÁLOGO &amp; BIENESTAR
           </p>
-          <h1>
-            Productos
-          </h1>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h1>Productos</h1>
+            <span class="conteo-pildora" th:text="${totalRegistros + (totalRegistros == 1 ? ' registro' : ' registros')}">0 registros</span>
+          </div>
         </div>
         <div class="d-flex flex-wrap gap-2">
           <!-- Reportes: exportan lo que muestra la lista, con los filtros activos -->
-          <a class="btn btn-success" th:href="@{/productos/exportar/excel(nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">
-            Exportar a Excel
+          <a class="btn btn-exportar" th:href="@{/productos/exportar/excel(nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#13613e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>
+              <path d="M14 2v6h6"/>
+              <path d="M8 13h8"/>
+              <path d="M8 17h8"/>
+            </svg>
+            Exportar Excel
           </a>
-          <a class="btn btn-danger" th:href="@{/productos/exportar/pdf(nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">
-            Exportar a PDF
+          <a class="btn btn-exportar" th:href="@{/productos/exportar/pdf(nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b42318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>
+              <path d="M14 2v6h6"/>
+              <path d="M9 15h6"/>
+            </svg>
+            Exportar PDF
           </a>
           <!-- Abre el modal de registro; /productos/nuevo sigue disponible como respaldo -->
           <button type="button" class="btn btn-primary" sec:authorize="hasRole('ADMINISTRADOR')" data-bs-toggle="modal" data-bs-target="#modalProducto">
@@ -31,118 +44,110 @@
           </button>
         </div>
       </div>
-      <form th:action="@{/productos}" method="get" class="panel row g-3 mb-4 filtros">
-        <div class="col-md-4">
-          <label for="buscar" class="form-label">
-            Buscar por nombre
-          </label>
-          <input id="buscar" name="nombre" th:value="${nombre}" class="form-control" placeholder="Ej. collar, alimento...">
-        </div>
-        <div class="col-md-4">
-          <label for="categoria" class="form-label">
-            Categoría
-          </label>
-          <select id="categoria" name="categoria" class="form-select">
-            <option value="">
-              Todas
-            </option>
-            <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}" th:selected="${c.id == categoriaFiltro}">
-            </option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label for="disponible" class="form-label">
-            Disponibilidad
-          </label>
-          <select id="disponible" name="disponible" class="form-select">
-            <option value="">
-              Todas
-            </option>
-            <option value="true" th:selected="${disponible != null and disponible}">
-              Con stock
-            </option>
-            <option value="false" th:selected="${disponible != null and !disponible}">
-              Sin stock
-            </option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label for="minimo" class="form-label">
-            Precio mínimo (S/)
-          </label>
-          <input id="minimo" name="minimo" type="number" min="0" step="0.01" th:value="${minimo}" class="form-control" placeholder="0.00">
-        </div>
-        <div class="col-md-3">
-          <label for="maximo" class="form-label">
-            Precio máximo (S/)
-          </label>
-          <input id="maximo" name="maximo" type="number" min="0" step="0.01" th:value="${maximo}" class="form-control" placeholder="0.00">
-        </div>
-        <div class="col-md-6 d-flex align-items-end gap-2">
-          <button class="btn btn-primary">
-            Aplicar filtros
-          </button>
-          <a class="btn btn-outline-secondary" th:href="@{/productos}">
-            Limpiar
-          </a>
-        </div>
-      </form>
-      <section class="panel p-0 overflow-hidden">
+
+      <!-- Botón colapsable de filtros en móvil -->
+      <div class="d-md-none mb-3">
+        <button class="btn btn-exportar w-100 justify-content-between" type="button" data-bs-toggle="collapse" data-bs-target="#filtrosProductos" aria-expanded="false" aria-controls="filtrosProductos">
+          <span class="d-inline-flex align-items-center gap-2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            Buscar y filtrar productos
+          </span>
+          <span class="small text-secondary" th:text="${(nombre != null and !nombre.isBlank()) or categoriaFiltro != null or disponible != null or minimo != null or maximo != null ? 'Activos' : 'Mostrar'}">Mostrar</span>
+        </button>
+      </div>
+
+      <div id="filtrosProductos" class="collapse d-md-block mb-4">
+        <form th:action="@{/productos}" method="get" class="panel-datos row g-2 align-items-end filtros">
+          <div class="col-12 col-md-3">
+            <label for="buscar" class="form-label">Buscar por nombre</label>
+            <div class="campo-busqueda">
+              <svg class="icono-busqueda" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+              <input id="buscar" name="nombre" th:value="${nombre}" class="form-control" placeholder="Ej. collar, alimento...">
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select id="categoria" name="categoria" class="form-select">
+              <option value="">Todas</option>
+              <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}" th:selected="${c.id == categoriaFiltro}"></option>
+            </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label for="disponible" class="form-label">Disponibilidad</label>
+            <select id="disponible" name="disponible" class="form-select">
+              <option value="">Todas</option>
+              <option value="true" th:selected="${disponible != null and disponible}">Con stock</option>
+              <option value="false" th:selected="${disponible != null and !disponible}">Sin stock</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-1">
+            <label for="minimo" class="form-label">Mín (S/)</label>
+            <input id="minimo" name="minimo" type="number" min="0" step="0.01" th:value="${minimo}" class="form-control tabular" placeholder="0">
+          </div>
+          <div class="col-6 col-md-1">
+            <label for="maximo" class="form-label">Máx (S/)</label>
+            <input id="maximo" name="maximo" type="number" min="0" step="0.01" th:value="${maximo}" class="form-control tabular" placeholder="0">
+          </div>
+          <div class="col-12 col-md-3 d-flex gap-2 justify-content-md-end">
+            <button class="btn btn-primary flex-grow-1 flex-md-grow-0">Aplicar</button>
+            <a class="btn btn-outline-secondary" th:href="@{/productos}">Limpiar</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Vista Escritorio: Tabla nítida -->
+      <section class="panel-datos p-0 overflow-hidden d-none d-md-block">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
-                <th>
-                  ID
-                </th>
-                <th>
-                  Imagen
-                </th>
-                <th>
-                  Nombre
-                </th>
-                <th>
-                  Categoría
-                </th>
-                <th>
-                  Precio
-                </th>
-                <th>
-                  Stock
-                </th>
-                <th>
-                  Estado
-                </th>
-                <th>
-                  Acciones
-                </th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th class="text-end">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr th:each="r : ${registros}">
-                <td th:text="${r.id}">
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <img class="producto-miniatura" th:src="@{${r.imagenUrl}}" th:alt="${r.nombre}">
+                    <div class="min-w-0">
+                      <div class="fw-bold">
+                        <span th:text="${r.nombre}">Producto</span>
+                        <span class="text-secondary fw-normal small ms-1 tabular" th:text="${'#' + r.id}">#1</span>
+                      </div>
+                      <div class="producto-desc-corta" th:if="${r.descripcion != null and !r.descripcion.isBlank()}" th:text="${r.descripcion}"></div>
+                    </div>
+                  </div>
                 </td>
                 <td>
-                  <img class="producto-miniatura" th:src="${r.imagen != null ? '/imagenes/' + r.imagen : '/img/producto.svg'}" th:alt="${r.nombre}">
+                  <span class="badge pildora-categoria" th:text="${r.categoria.nombre}">Categoría</span>
                 </td>
-                <td class="fw-semibold" th:text="${r.nombre}">
-                </td>
-                <td th:text="${r.categoria.nombre}">
-                </td>
-                <td class="text-nowrap fw-semibold" th:text="${'S/ ' + #numbers.formatDecimal(r.precio,1,2)}">
-                </td>
-                <td th:text="${r.stock}">
-                </td>
+                <td class="text-nowrap fw-bold tabular" th:text="${'S/ ' + #numbers.formatDecimal(r.precio,1,2)}">S/ 0.00</td>
                 <td>
-                  <span class="badge" th:classappend="${r.estado ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${r.estado ? 'Activo' : 'Inactivo'}">
+                  <span class="badge tabular"
+                        th:classappend="${r.stock == 0 ? 'text-bg-danger' : (r.stock < 10 ? 'text-bg-warning' : 'text-bg-success')}"
+                        th:text="${r.stock + ' uds · ' + (r.stock == 0 ? 'Sin stock' : (r.stock < 10 ? 'Stock bajo' : 'Disponible'))}">
+                    0 uds
                   </span>
                 </td>
                 <td>
-                  <div class="d-flex gap-2 flex-wrap">
+                  <span class="badge" th:classappend="${r.estado ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${r.estado ? 'Activo' : 'Inactivo'}"></span>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
                     <a class="btn btn-sm btn-outline-primary" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos/editar/{id}(id=${r.id})}">
                       Editar
                     </a>
-                    <form sec:authorize="hasRole('ADMINISTRADOR')" th:action="@{/productos/eliminar/{id}(id=${r.id})}" method="post" data-confirmar="¿Deseas eliminar este registro? Esta acción no se puede deshacer.">
+                    <form sec:authorize="hasRole('ADMINISTRADOR')" th:action="@{/productos/eliminar/{id}(id=${r.id},pagina=${paginaActual},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}" method="post" th:attr="data-confirmar=${'¿Deseas eliminar «' + r.nombre + '» y su inventario asociado? Esta acción no se puede deshacer.'}">
                       <button class="btn btn-sm btn-outline-danger">
                         Eliminar
                       </button>
@@ -154,115 +159,152 @@
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(registros)}">
-                <td colspan="12" class="text-center py-5 text-secondary">
-                  No se encontraron registros.
+                <td colspan="6" class="text-center py-5 text-secondary">
+                  No se encontraron productos con los filtros seleccionados.
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        <div class="pie-tabla" th:if="${totalRegistros > 0}">
+          <span class="small text-secondary tabular" th:text="${totalRegistros + (totalRegistros == 1 ? ' producto en total' : ' productos en total')}"></span>
+          <nav th:if="${totalPaginas > 1}" aria-label="Paginación de productos">
+            <ul class="pagination flex-wrap mb-0">
+              <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/productos(pagina=${paginaActual - 1},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">Anterior</a>
+              </li>
+              <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" th:classappend="${i == paginaActual} ? 'active'">
+                <a class="page-link tabular" th:href="@{/productos(pagina=${i},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}" th:text="${i + 1}"></a>
+              </li>
+              <li class="page-item" th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/productos(pagina=${paginaActual + 1},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">Siguiente</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </section>
-      <!-- Paginación: conserva los filtros activos en cada enlace -->
-      <nav th:if="${totalPaginas > 1}" aria-label="Paginación de productos" class="mt-3">
-        <ul class="pagination flex-wrap mb-1">
-          <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-            <a class="page-link" th:href="@{/productos(pagina=${paginaActual - 1},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">
-              Anterior
-            </a>
-          </li>
-          <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" th:classappend="${i == paginaActual} ? 'active'">
-            <a class="page-link" th:href="@{/productos(pagina=${i},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}" th:text="${i + 1}">
-            </a>
-          </li>
-          <li class="page-item" th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
-            <a class="page-link" th:href="@{/productos(pagina=${paginaActual + 1},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">
-              Siguiente
-            </a>
-          </li>
-        </ul>
-        <p class="small text-secondary" th:text="${totalRegistros + ' productos en total'}">
-        </p>
-      </nav>
+
+      <!-- Vista Móvil: Tarjetas verticales responsivas (sin tablas recortadas) -->
+      <section class="d-md-none d-flex flex-column gap-3">
+        <article class="lista-movil-card" th:each="r : ${registros}">
+          <div class="d-flex align-items-start gap-3">
+            <img class="producto-miniatura" style="width:56px;height:56px;" th:src="@{${r.imagenUrl}}" th:alt="${r.nombre}">
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <h2 class="h6 fw-bold mb-1" th:text="${r.nombre}">Producto</h2>
+                <span class="fw-bold tabular text-nowrap" style="color:var(--azul-clinico);" th:text="${'S/ ' + #numbers.formatDecimal(r.precio,1,2)}">S/ 0.00</span>
+              </div>
+              <div class="d-flex flex-wrap gap-1 mb-1">
+                <span class="badge pildora-categoria" th:text="${r.categoria.nombre}">Categoría</span>
+                <span class="badge tabular"
+                      th:classappend="${r.stock == 0 ? 'text-bg-danger' : (r.stock < 10 ? 'text-bg-warning' : 'text-bg-success')}"
+                      th:text="${r.stock + ' uds'}">0 uds</span>
+                <span class="badge" th:classappend="${r.estado ? 'text-bg-success' : 'text-bg-secondary'}" th:text="${r.estado ? 'Activo' : 'Inactivo'}"></span>
+              </div>
+              <p class="small text-secondary mb-0" th:if="${r.descripcion != null and !r.descripcion.isBlank()}" th:text="${r.descripcion}"></p>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top" sec:authorize="hasRole('ADMINISTRADOR')">
+            <a class="btn btn-sm btn-outline-primary" th:href="@{/productos/editar/{id}(id=${r.id})}">Editar</a>
+            <form th:action="@{/productos/eliminar/{id}(id=${r.id},pagina=${paginaActual},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}" method="post" th:attr="data-confirmar=${'¿Deseas eliminar «' + r.nombre + '» y su inventario asociado? Esta acción no se puede deshacer.'}">
+              <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+            </form>
+          </div>
+        </article>
+
+        <div th:if="${#lists.isEmpty(registros)}" class="panel-datos text-center py-5 text-secondary">
+          No se encontraron productos con los filtros seleccionados.
+        </div>
+
+        <nav th:if="${totalPaginas > 1}" aria-label="Paginación móvil de productos" class="d-flex flex-column align-items-center gap-2 mt-1">
+          <ul class="pagination flex-wrap mb-0">
+            <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+              <a class="page-link" th:href="@{/productos(pagina=${paginaActual - 1},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">Anterior</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" th:classappend="${i == paginaActual} ? 'active'">
+              <a class="page-link tabular" th:href="@{/productos(pagina=${i},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}" th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
+              <a class="page-link" th:href="@{/productos(pagina=${paginaActual + 1},nombre=${nombre},categoria=${categoriaFiltro},disponible=${disponible},minimo=${minimo},maximo=${maximo})}">Siguiente</a>
+            </li>
+          </ul>
+          <span class="small text-secondary tabular" th:text="${totalRegistros + ' productos en total'}"></span>
+        </nav>
+      </section>
     </main>
+
     <!-- Modal de registro (solo administrador; el servidor lo vuelve a comprobar) -->
     <div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoTitulo" aria-hidden="true" sec:authorize="hasRole('ADMINISTRADOR')">
-      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content" th:action="@{/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data">
           <div class="modal-header">
-            <h2 class="modal-title h5" id="modalProductoTitulo">
-              Registrar nuevo producto
-            </h2>
+            <div>
+              <p class="eyebrow mb-1">CATÁLOGO · NUEVO REGISTRO</p>
+              <h2 class="modal-title h5 mb-0 fw-bold" id="modalProductoTitulo">
+                Registrar nuevo producto
+              </h2>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label" for="m-nombre">
-                  Nombre *
-                </label>
-                <input id="m-nombre" name="nombre" type="text" class="form-control" required maxlength="150">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="m-categoria">
-                  Categoría *
-                </label>
-                <select id="m-categoria" name="categoria.id" class="form-select" required>
-                  <option value="">
-                    Selecciona una categoría
-                  </option>
-                  <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}">
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="m-precio">
-                  Precio (S/) *
-                </label>
-                <input id="m-precio" name="precio" type="number" class="form-control" required min="0" step="0.01">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="m-stock">
-                  Stock inicial *
-                </label>
-                <input id="m-stock" name="stock" type="number" class="form-control" required min="0" step="1" value="0">
-              </div>
-              <div class="col-12">
-                <label class="form-label" for="m-descripcion">
-                  Descripción
-                </label>
-                <textarea id="m-descripcion" name="descripcion" class="form-control" rows="2" maxlength="1000"></textarea>
-              </div>
+            <div class="row g-4">
               <div class="col-md-8">
-                <label class="form-label" for="archivo">
-                  Imagen del producto
-                </label>
-                <input id="archivo" name="archivo" type="file" accept="image/jpeg,image/png" class="form-control">
-                <div class="form-text">
-                  JPG o PNG, hasta 2 MB.
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label" for="m-nombre">Nombre *</label>
+                    <input id="m-nombre" name="nombre" type="text" class="form-control" required maxlength="150" placeholder="Ej. Alimento balanceado para perro">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="m-categoria">Categoría *</label>
+                    <select id="m-categoria" name="categoria.id" class="form-select" required>
+                      <option value="">Selecciona una categoría</option>
+                      <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}"></option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 d-flex align-items-end pb-1">
+                    <div class="form-check form-switch">
+                      <input id="m-estado" name="estado" type="checkbox" class="form-check-input" checked value="true">
+                      <input type="hidden" name="_estado" value="on">
+                      <label for="m-estado" class="form-check-label fw-semibold">Activo en catálogo</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="m-precio">Precio (S/) *</label>
+                    <input id="m-precio" name="precio" type="number" class="form-control tabular" required min="0" step="0.01" placeholder="0.00">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="m-stock">Stock inicial *</label>
+                    <input id="m-stock" name="stock" type="number" class="form-control tabular" required min="0" step="1" value="0">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label" for="m-descripcion">Descripción</label>
+                    <textarea id="m-descripcion" name="descripcion" class="form-control" rows="2" maxlength="1000" placeholder="Detalles clave del producto..."></textarea>
+                  </div>
                 </div>
               </div>
-              <div class="col-md-4 d-flex align-items-end">
-                <div class="form-check form-switch">
-                  <input id="m-estado" name="estado" type="checkbox" class="form-check-input" checked value="true">
-                  <input type="hidden" name="_estado" value="on">
-                  <label for="m-estado" class="form-check-label">
-                    Activo
-                  </label>
+              <div class="col-md-4 d-flex flex-column">
+                <label class="form-label" for="archivo">Imagen del producto</label>
+                <div class="zona-imagen-preview flex-grow-1 justify-content-center">
+                  <img id="modalImagenPreview" class="imagen-preview-marco" th:src="@{/img/producto.svg}" data-default-src="/img/producto.svg" alt="Vista previa del producto">
+                  <div class="small fw-semibold">Previsualización</div>
+                  <input id="archivo" name="archivo" type="file" accept="image/jpeg,image/png" class="form-control form-control-sm" data-preview="#modalImagenPreview">
+                  <div class="form-text m-0">JPG o PNG, hasta 2 MB.</div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">
-              Guardar
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-              Cancelar
-            </button>
+          <div class="modal-footer justify-content-between">
+            <span class="small text-secondary d-none d-sm-inline">Sincroniza automáticamente con Inventario.</span>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar producto</button>
+            </div>
           </div>
         </form>
       </div>
     </div>
+
     <div th:replace="~{fragmentos/layout :: pie}">
     </div>
   </body>

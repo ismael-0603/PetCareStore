@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('Acceso restringido · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -8,18 +8,19 @@
     <main class="container-fluid contenido">
       <div th:replace="~{fragmentos/layout :: mensajes}">
       </div>
-      <section class="panel text-center py-5">
-        <p class="eyebrow">
-          ERROR 403
-        </p>
-        <h1>
-          Acceso restringido
-        </h1>
-        <p th:text="${mensaje != null ? mensaje : 'Tu cuenta no tiene permisos para realizar esta operación.'}">
-        </p>
-        <a class="btn btn-primary" th:href="@{/dashboard}">
-          Volver al inicio
-        </a>
+      <section class="panel-datos text-center py-5 px-4 mx-auto" style="max-width:620px;">
+        <span class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:56px;height:56px;background:#feeceb;color:#b42318;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </span>
+        <div>
+          <p class="eyebrow">ERROR 403</p>
+        </div>
+        <h1 class="h3 mb-2">Acceso restringido</h1>
+        <p class="text-secondary mb-4" th:text="${mensaje != null ? mensaje : 'Tu cuenta no tiene permisos para realizar esta operación.'}"></p>
+        <a class="btn btn-primary" th:href="@{/dashboard}">Volver al inicio</a>
       </section>
     </main>
     <div th:replace="~{fragmentos/layout :: pie}">

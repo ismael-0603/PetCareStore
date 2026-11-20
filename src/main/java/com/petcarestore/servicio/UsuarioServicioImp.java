@@ -55,11 +55,11 @@ public class UsuarioServicioImp implements UsuarioServicio {
       throw new ReglaNegocioException("Debe conservar al menos un administrador activo.");
     String nueva = datos.getNuevaPassword();
     if (usuario.getId() == null && (nueva == null || nueva.isBlank()))
-      throw new ReglaNegocioException("La contrasena es obligatoria para usuarios nuevos.");
+      throw new ReglaNegocioException("La contraseña es obligatoria para usuarios nuevos.");
     if (nueva != null && !nueva.isBlank()) {
       if (nueva.length() < 8 || nueva.getBytes(StandardCharsets.UTF_8).length > 72)
         throw new ReglaNegocioException(
-            "La contrasena debe tener al menos 8 caracteres y como maximo 72 bytes.");
+            "La contraseña debe tener al menos 8 caracteres y como máximo 72 bytes.");
       usuario.setPassword(encoder.encode(nueva));
     }
     usuario.setNombre(datos.getNombre());

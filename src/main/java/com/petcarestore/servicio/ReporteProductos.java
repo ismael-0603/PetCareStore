@@ -31,7 +31,7 @@ public class ReporteProductos {
   private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
   // Posición X de cada columna en el PDF (A4 vertical mide 595 puntos de ancho).
-  private static final float[] X_PDF = {40, 75, 265, 395, 470, 515};
+  private static final float[] X_PDF = {40, 101, 280, 397, 464, 520};
   private static final float MARGEN_SUPERIOR = 790;
   private static final float MARGEN_INFERIOR = 50;
 
@@ -119,14 +119,17 @@ public class ReporteProductos {
           }
           String[] valores = {
             String.valueOf(p.getId()),
-            recortar(texto(p.getNombre()), 34),
-            recortar(nombreCategoria(p), 22),
+            texto(p.getNombre()),
+            nombreCategoria(p),
             formatoPrecio(p.getPrecio()),
             String.valueOf(p.getStock() == null ? 0 : p.getStock()),
             p.isEstado() ? "Activo" : "Inactivo"
           };
-          for (int i = 0; i < valores.length; i++)
-            escribir(contenido, PDType1Font.HELVETICA, 9, X_PDF[i], y, valores[i]);
+          for (int i = 0; i < valores.length; i++) {
+            float borde = i + 1 < X_PDF.length ? X_PDF[i + 1] : 560;
+            String valor = ajustarColumna(valores[i], borde - X_PDF[i] - 4);
+            escribir(contenido, PDType1Font.HELVETICA, 9, X_PDF[i], y, valor);
+          }
           y -= 16;
         }
         if (productos.isEmpty())
@@ -162,7 +165,7 @@ public class ReporteProductos {
     contenido.beginText();
     contenido.setFont(fuente, tamano);
     contenido.newLineAtOffset(x, y);
-    contenido.showText(compatible(fuente, valor));
+    contenido.showText(valor);
     contenido.endText();
   }
 
@@ -199,7 +202,18 @@ public class ReporteProductos {
     return valor == null ? "" : valor;
   }
 
-  private String recortar(String valor, int maximo) {
-    return valor.length() > maximo ? valor.substring(0, maximo - 1) + "…" : valor;
+  private String ajustarColumna(String valor, float ancho) throws IOException {
+    PDFont fuente = PDType1Font.HELVETICA;
+    String texto = compatible(fuente, valor);
+    float limite = ancho * 1000 / 9;
+    if (fuente.getStringWidth(texto) <= limite) return texto;
+    float ocupado = fuente.getStringWidth("…");
+    int fin = 0;
+    while (fin < texto.length()) {
+      ocupado += fuente.getStringWidth(texto.substring(fin, fin + 1));
+      if (ocupado > limite) break;
+      fin++;
+    }
+    return texto.substring(0, fin) + "…";
   }
 }

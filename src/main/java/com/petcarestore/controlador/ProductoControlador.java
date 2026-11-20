@@ -26,13 +26,11 @@ public class ProductoControlador {
   private static final int TAMANO = 5; // productos por página
   private final ProductoServicio servicio;
   private final CategoriaServicio categorias;
-  private final ImagenServicio imagenes;
 
   public ProductoControlador(
-      ProductoServicio servicio, CategoriaServicio categorias, ImagenServicio imagenes) {
+      ProductoServicio servicio, CategoriaServicio categorias) {
     this.servicio = servicio;
     this.categorias = categorias;
-    this.imagenes = imagenes;
   }
 
   @InitBinder("producto")
@@ -150,14 +148,13 @@ public class ProductoControlador {
       RedirectAttributes mensajes) {
     if (!resultado.hasErrors()) {
       try {
-        producto.setImagen(imagenes.guardar(archivo));
-        servicio.guardar(producto);
+        servicio.guardarConImagen(producto, archivo);
         mensajes.addFlashAttribute("exito", "Producto guardado e inventario sincronizado.");
         return "redirect:/productos";
       } catch (ReglaNegocioException e) {
         resultado.reject("negocio", e.getMessage());
       } catch (DataIntegrityViolationException e) {
-        resultado.reject("datos", "No se pudo guardar. Revise la categoria seleccionada.");
+        resultado.reject("datos", "No se pudo guardar. Revise la categoría seleccionada.");
       }
     }
     model.addAttribute("categorias", categorias.listar());
@@ -165,8 +162,14 @@ public class ProductoControlador {
   }
 
   @PostMapping("/eliminar/{id}")
-  public String eliminar(@PathVariable Integer id, RedirectAttributes mensajes) {
+  public String eliminar(
+      @PathVariable Integer id, @RequestParam java.util.Map<String, String> parametros,
+      RedirectAttributes mensajes) {
     servicio.eliminar(id);
+    for (String filtro : List.of("pagina", "nombre", "categoria", "disponible", "minimo", "maximo")) {
+      String valor = parametros.get(filtro);
+      if (valor != null && !valor.isBlank()) mensajes.addAttribute(filtro, valor);
+    }
     mensajes.addFlashAttribute("exito", "Producto e inventario eliminados.");
     return "redirect:/productos";
   }

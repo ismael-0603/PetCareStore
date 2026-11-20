@@ -10,11 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ClienteServicioImp implements ClienteServicio {
   private final ClienteRepositorio repositorio;
-  private final ProductoRepositorio productos;
 
-  public ClienteServicioImp(ClienteRepositorio repositorio, ProductoRepositorio productos) {
+  public ClienteServicioImp(ClienteRepositorio repositorio) {
     this.repositorio = repositorio;
-    this.productos = productos;
   }
 
   @Override
@@ -35,6 +33,9 @@ public class ClienteServicioImp implements ClienteServicio {
     Integer id = registro.getId() == null ? -1 : registro.getId();
     if (repositorio.existsByDocumentoAndIdNot(registro.getDocumento(), id))
       throw new ReglaNegocioException("Ya existe un registro con ese documento.");
+    if (repositorio.existsByCorreoIgnoreCaseAndIdNot(registro.getCorreo(), id))
+      throw new ReglaNegocioException("Ya existe un cliente con ese correo.");
+    registro.setCorreo(registro.getCorreo().toLowerCase(java.util.Locale.ROOT));
     return repositorio.save(registro);
   }
 

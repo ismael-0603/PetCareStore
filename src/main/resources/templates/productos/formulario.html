@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('Producto · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -8,93 +8,86 @@
     <main class="container-fluid contenido">
       <div th:replace="~{fragmentos/layout :: mensajes}">
       </div>
+
       <div class="cabecera-pagina">
         <div>
-          <p class="eyebrow">
-            PETCARE STORE
-          </p>
-          <h1 th:text="${producto.id == null ? 'Registrar producto' : 'Editar producto'}">
-          </h1>
+          <nav class="migas" aria-label="Ruta de navegación">
+            <a th:href="@{/productos}">Productos</a>
+            <span>/</span>
+            <span th:text="${producto.id == null ? 'Nuevo producto' : 'Editar producto'}"></span>
+          </nav>
+          <h1 th:text="${producto.id == null ? 'Registrar producto' : 'Editar producto'}"></h1>
         </div>
       </div>
-      <section class="panel formulario-panel">
-        <form th:action="@{/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data">
-          <input type="hidden" th:field="*{id}">
-          <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
-            <p class="mb-1">
-              Revisa los datos del formulario:
-            </p>
-            <ul class="mb-0">
-              <li th:each="err : ${#fields.allErrors()}" th:text="${err}">
-              </li>
-            </ul>
-          </div>
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label" for="nombre">
-                Nombre *
-              </label>
-              <input id="nombre" th:field="*{nombre}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="150">
-            </div>
-            <div class="col-md-12">
-              <label class="form-label" for="descripcion">
-                Descripción
-              </label>
-              <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="3" maxlength="1000">
-              </textarea>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" for="precio">
-                Precio (S/) *
-              </label>
-              <input id="precio" th:field="*{precio}" type="number" class="form-control" th:errorclass="is-invalid" required min="0" step="0.01">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" for="stock">
-                Stock disponible *
-              </label>
-              <input id="stock" th:field="*{stock}" type="number" class="form-control" th:errorclass="is-invalid" required min="0" step="1">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" for="categoriaId">
-                Categoría *
-              </label>
-              <select id="categoriaId" th:field="*{categoria.id}" class="form-select" required>
-                <option value="">
-                  Selecciona una categoría
-                </option>
-                <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}">
-                </option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" for="archivo">
-                Imagen del producto
-              </label>
-              <input id="archivo" name="archivo" type="file" accept="image/jpeg,image/png" class="form-control">
-              <div class="form-text">
-                JPG o PNG, hasta 2 MB. Déjalo vacío para conservar la imagen actual.
+
+      <form th:action="@{/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:field="*{id}">
+
+        <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger mb-4 flex-column align-items-start" role="alert">
+          <p class="mb-1 fw-bold">Revisa los datos del formulario:</p>
+          <ul class="mb-0 ps-3">
+            <li th:each="err : ${#fields.allErrors()}" th:text="${err}"></li>
+          </ul>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-8">
+            <section class="panel-datos p-4">
+              <h2 class="h6 fw-bold mb-1">Información general</h2>
+              <p class="small text-secondary mb-4">Datos visibles en el catálogo y en los reportes Excel y PDF.</p>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label" for="nombre">Nombre *</label>
+                  <input id="nombre" th:field="*{nombre}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="150">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="categoriaId">Categoría *</label>
+                  <select id="categoriaId" th:field="*{categoria.id}" class="form-select" required>
+                    <option value="">Selecciona una categoría</option>
+                    <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}"></option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" for="precio">Precio (S/) *</label>
+                  <input id="precio" th:field="*{precio}" type="number" class="form-control tabular" th:errorclass="is-invalid" required min="0" step="0.01">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" for="stock">Stock *</label>
+                  <input id="stock" th:field="*{stock}" type="number" class="form-control tabular" th:errorclass="is-invalid" required min="0" step="1">
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="descripcion">Descripción</label>
+                  <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="3" maxlength="1000"></textarea>
+                </div>
               </div>
-            </div>
-            <div class="col-12">
-              <div class="form-check form-switch">
-                <input id="estado" type="checkbox" th:field="*{estado}" class="form-check-input">
-                <label for="estado" class="form-check-label">
-                  Activo
-                </label>
+              <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+                <a class="btn btn-outline-secondary" th:href="@{/productos}">Cancelar</a>
+                <button class="btn btn-primary">Guardar producto</button>
               </div>
-            </div>
+            </section>
           </div>
-          <div class="d-flex gap-2 mt-4">
-            <button class="btn btn-primary">
-              Guardar
-            </button>
-            <a class="btn btn-outline-secondary" th:href="@{/productos}">
-              Cancelar
-            </a>
+
+          <div class="col-12 col-lg-4">
+            <aside class="panel-datos p-4 d-flex flex-column gap-3">
+              <h2 class="h6 fw-bold mb-0">Imagen y estado</h2>
+              <div class="zona-imagen-preview">
+                <img id="formImagenPreview" class="imagen-preview-marco" th:src="@{${producto.imagenUrl}}" th:attr="data-default-src=${producto.imagenUrl}" alt="Vista previa del producto">
+                <div class="w-100 text-start">
+                  <label class="form-label" for="archivo">Archivo de imagen</label>
+                  <input id="archivo" name="archivo" type="file" accept="image/jpeg,image/png" class="form-control form-control-sm" data-preview="#formImagenPreview">
+                  <div class="form-text">JPG o PNG, hasta 2 MB. Déjalo vacío para conservar la imagen actual.</div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                <label for="estado" class="form-check-label fw-semibold">Producto activo</label>
+                <div class="form-check form-switch m-0">
+                  <input id="estado" type="checkbox" th:field="*{estado}" class="form-check-input">
+                </div>
+              </div>
+            </aside>
           </div>
-        </form>
-      </section>
+        </div>
+      </form>
     </main>
     <div th:replace="~{fragmentos/layout :: pie}">
     </div>

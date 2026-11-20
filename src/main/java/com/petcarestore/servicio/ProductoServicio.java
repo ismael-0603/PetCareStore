@@ -2,11 +2,14 @@ package com.petcarestore.servicio;
 
 import com.petcarestore.modelo.Producto;
 import java.math.BigDecimal;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
 public interface ProductoServicio {
   Producto guardar(Producto registro);
+
+  Producto guardarConImagen(Producto registro, MultipartFile archivo);
 
   Producto buscarPorId(Integer id);
 

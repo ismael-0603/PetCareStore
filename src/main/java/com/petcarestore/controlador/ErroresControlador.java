@@ -25,7 +25,7 @@ public class ErroresControlador {
   public String datoInvalido(Exception e, Model model) {
     model.addAttribute(
         "mensaje",
-        "La solicitud contiene datos invalidos. Revise los campos e intente nuevamente.");
+        "La solicitud contiene datos inválidos. Revise los campos e intente nuevamente.");
     return "error/400";
   }
 
@@ -33,7 +33,7 @@ public class ErroresControlador {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public String imagenGrande(Exception e, Model model) {
     model.addAttribute(
-        "mensaje", "La imagen supera el limite de 2 MB. Regrese al formulario y seleccione otra.");
+        "mensaje", "La imagen supera el límite de 2 MB. Regrese al formulario y seleccione otra.");
     return "error/400";
   }
 }

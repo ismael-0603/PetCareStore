@@ -75,4 +75,15 @@ public class Inventario {
   public boolean isStockBajo() {
     return cantidad < stockMinimo;
   }
+
+  @Transient
+  public int getPorcentajeStock() {
+    if (stockMinimo == null || stockMinimo <= 0) {
+      return cantidad != null && cantidad > 0 ? 100 : 0;
+    }
+    int qty = cantidad == null ? 0 : cantidad;
+    int pct = (int) Math.round((qty * 100.0) / stockMinimo);
+    if (qty == 0) return 4;
+    return Math.min(100, Math.max(8, pct));
+  }
 }

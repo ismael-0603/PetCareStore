@@ -3,6 +3,7 @@ package com.petcarestore.servicio;
 import com.petcarestore.modelo.*;
 import com.petcarestore.repositorio.*;
 import java.math.BigDecimal;
+import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -18,12 +19,14 @@ public class ProductoServicioImp implements ProductoServicio {
   private final CategoriaRepositorio categorias;
   private final InventarioRepositorio inventarios;
   private final ReporteProductos reportes;
+  private final ImagenServicio imagenes;
 
   public ProductoServicioImp(
       ProductoRepositorio productos,
       CategoriaRepositorio categorias,
       InventarioRepositorio inventarios,
-      ReporteProductos reportes) {
+      ReporteProductos reportes, ImagenServicio imagenes) {
+    this.imagenes = imagenes;
     this.productos = productos;
     this.categorias = categorias;
     this.inventarios = inventarios;
@@ -65,15 +68,30 @@ public class ProductoServicioImp implements ProductoServicio {
       int tamano) {
     validarRango(minimo, maximo);
     // Se acota la página y el tamaño para que un parámetro manipulado no rompa la consulta.
-    Pageable pageable = PageRequest.of(Math.max(pagina, 0), Math.min(Math.max(tamano, 1), 50));
-    return productos.filtrarPagina(nombre, categoria, disponible, minimo, maximo, pageable);
+    int porPagina = Math.min(Math.max(tamano, 1), 50);
+    int indice = Math.min(Math.max(pagina, 0), Integer.MAX_VALUE / porPagina);
+    Pageable pageable = PageRequest.of(indice, porPagina);
+    Page<Producto> resultado =
+        productos.filtrarPagina(nombre, categoria, disponible, minimo, maximo, pageable);
+    if (indice == 0 || resultado.hasContent()) return resultado;
+    if (resultado.getTotalElements() == 0) return Page.empty(pageable.first());
+    return productos.filtrarPagina(nombre, categoria, disponible, minimo, maximo,
+        PageRequest.of(resultado.getTotalPages() - 1, porPagina));
   }
 
   private void validarRango(BigDecimal minimo, BigDecimal maximo) {
     if ((minimo != null && minimo.signum() < 0)
         || (maximo != null && maximo.signum() < 0)
         || (minimo != null && maximo != null && minimo.compareTo(maximo) > 0))
-      throw new ReglaNegocioException("El rango de precios no es valido.");
+      throw new ReglaNegocioException("El rango de precios no es válido.");
+  }
+
+  @Override
+  @Transactional
+  @PreAuthorize("hasRole('ADMINISTRADOR')")
+  public Producto guardarConImagen(Producto datos, MultipartFile archivo) {
+    datos.setImagen(imagenes.guardar(archivo));
+    return guardar(datos);
   }
 
   @Override
@@ -86,7 +104,7 @@ public class ProductoServicioImp implements ProductoServicio {
         || datos.getPrecio().signum() < 0)
       throw new ReglaNegocioException("Precio y stock deben ser cero o mayores.");
     if (datos.getCategoria() == null || datos.getCategoria().getId() == null)
-      throw new ReglaNegocioException("Seleccione una categoria.");
+      throw new ReglaNegocioException("Seleccione una categoría.");
     Categoria categoria =
         categorias
             .findById(datos.getCategoria().getId())

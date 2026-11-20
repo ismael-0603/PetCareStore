@@ -49,9 +49,9 @@ public class InventarioServicioImp implements InventarioServicio {
             .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
     if (stockMinimo != null) {
       if (!administrador)
-        throw new AccessDeniedException("Solo el administrador puede modificar el minimo.");
+        throw new AccessDeniedException("Solo el administrador puede modificar el mínimo.");
       if (stockMinimo < 0)
-        throw new ReglaNegocioException("El stock minimo no puede ser negativo.");
+        throw new ReglaNegocioException("El stock mínimo no puede ser negativo.");
       inventario.setStockMinimo(stockMinimo);
     }
     producto.setStock(cantidad);

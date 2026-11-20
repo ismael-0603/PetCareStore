@@ -108,4 +108,35 @@ public class Producto {
   public void setEstado(boolean estado) {
     this.estado = estado;
   }
+
+  @Transient
+  public String getImagenUrl() {
+    if (imagen != null && !imagen.isBlank()) {
+      return "/imagenes/" + imagen;
+    }
+    String texto = nombre == null ? "" : nombre.toLowerCase();
+    if (texto.contains("alimento") || texto.contains("croqueta") || texto.contains("comida")) {
+      return "/img/productos/alimento-perros.jpg";
+    }
+    if (texto.contains("collar") || texto.contains("correa")) {
+      return "/img/productos/collar-ajustable.jpg";
+    }
+    if (texto.contains("pelota") || texto.contains("juguete")) {
+      return "/img/productos/pelota-mascotas.jpg";
+    }
+    if (texto.contains("champ") || texto.contains("shampoo") || texto.contains("jab")) {
+      return "/img/productos/champu-perros.jpg";
+    }
+    if (texto.contains("cepillo") || texto.contains("peine")) {
+      return "/img/productos/cepillo-gatos.jpg";
+    }
+    if (categoria != null && categoria.getNombre() != null) {
+      String cat = categoria.getNombre().toLowerCase();
+      if (cat.contains("alimento")) return "/img/productos/alimento-perros.jpg";
+      if (cat.contains("accesorio")) return "/img/productos/collar-ajustable.jpg";
+      if (cat.contains("juguete")) return "/img/productos/pelota-mascotas.jpg";
+      if (cat.contains("higiene")) return "/img/productos/champu-perros.jpg";
+    }
+    return "/img/producto.svg";
+  }
 }

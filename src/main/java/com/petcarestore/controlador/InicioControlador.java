@@ -24,9 +24,12 @@ public class InicioControlador {
   public String dashboard(Model model) {
     ResumenDashboard resumen = dashboard.resumen();
     model.addAttribute("totalProductos", resumen.totalProductos());
+    model.addAttribute("productosActivos", dashboard.productosActivos());
     model.addAttribute("totalClientes", resumen.totalClientes());
     model.addAttribute("totalCategorias", resumen.totalCategorias());
     model.addAttribute("stockBajo", resumen.stockBajo());
+    model.addAttribute("alertasReposicion", dashboard.alertasStockBajo());
+    model.addAttribute("distribucionCategorias", dashboard.distribucionCategorias());
     return "dashboard";
   }
 

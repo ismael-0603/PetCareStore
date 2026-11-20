@@ -24,19 +24,19 @@ public class Cliente {
   @NotBlank
   @Pattern(
       regexp = "[A-Za-z0-9-]{6,20}",
-      message = "Debe tener entre 6 y 20 letras, numeros o guiones")
+      message = "Debe tener entre 6 y 20 letras, números o guiones")
   @Column(nullable = false, unique = true, length = 20)
   private String documento;
 
   @NotBlank
-  @Pattern(regexp = "[+0-9 ()-]{6,20}", message = "Telefono no valido")
+  @Pattern(regexp = "[0-9]{9}", message = "El teléfono debe tener exactamente 9 dígitos.")
   @Column(nullable = false, length = 20)
   private String telefono;
 
   @NotBlank
   @Email
   @Size(max = 150)
-  @Column(nullable = false, length = 150)
+  @Column(nullable = false, length = 150, unique = true)
   private String correo;
 
   @NotBlank

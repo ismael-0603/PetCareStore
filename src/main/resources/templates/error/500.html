@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('Error interno · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -8,18 +8,20 @@
     <main class="container-fluid contenido">
       <div th:replace="~{fragmentos/layout :: mensajes}">
       </div>
-      <section class="panel text-center py-5">
-        <p class="eyebrow">
-          ERROR 500
-        </p>
-        <h1>
-          No se pudo completar la operación
-        </h1>
-        <p th:text="${mensaje != null ? mensaje : 'Ocurrió un error al procesar la solicitud. Revisa la conexión con la base de datos e inténtalo nuevamente.'}">
-        </p>
-        <a class="btn btn-primary" th:href="@{/dashboard}">
-          Volver al inicio
-        </a>
+      <section class="panel-datos text-center py-5 px-4 mx-auto" style="max-width:620px;">
+        <span class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:56px;height:56px;background:#feeceb;color:#b42318;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <path d="M12 9v4"/>
+            <path d="M12 17h.01"/>
+          </svg>
+        </span>
+        <div>
+          <p class="eyebrow">ERROR 500</p>
+        </div>
+        <h1 class="h3 mb-2">No se pudo completar la operación</h1>
+        <p class="text-secondary mb-4" th:text="${mensaje != null ? mensaje : 'Ocurrió un error al procesar la solicitud. Revisa la conexión con la base de datos e inténtalo nuevamente.'}"></p>
+        <a class="btn btn-primary" th:href="@{/dashboard}">Volver al inicio</a>
       </section>
     </main>
     <div th:replace="~{fragmentos/layout :: pie}">

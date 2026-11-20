@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('Solicitud inválida · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -8,18 +8,20 @@
     <main class="container-fluid contenido">
       <div th:replace="~{fragmentos/layout :: mensajes}">
       </div>
-      <section class="panel text-center py-5">
-        <p class="eyebrow">
-          ERROR 400
-        </p>
-        <h1>
-          Revisa tu solicitud
-        </h1>
-        <p th:text="${mensaje != null ? mensaje : 'Los datos enviados no son válidos.'}">
-        </p>
-        <a class="btn btn-primary" th:href="@{/dashboard}">
-          Volver al inicio
-        </a>
+      <section class="panel-datos text-center py-5 px-4 mx-auto" style="max-width:620px;">
+        <span class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:56px;height:56px;background:#FEF3E2;color:#D9822B;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </span>
+        <div>
+          <p class="eyebrow">ERROR 400</p>
+        </div>
+        <h1 class="h3 mb-2">Revisa tu solicitud</h1>
+        <p class="text-secondary mb-4" th:text="${mensaje != null ? mensaje : 'Los datos enviados no son válidos.'}"></p>
+        <a class="btn btn-primary" th:href="@{/dashboard}">Volver al inicio</a>
       </section>
     </main>
     <div th:replace="~{fragmentos/layout :: pie}">

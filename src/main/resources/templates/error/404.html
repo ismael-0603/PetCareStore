@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-  <head th:replace="~{fragmentos/layout :: cabeza('PetCare Store')}">
+  <head th:replace="~{fragmentos/layout :: cabeza('No encontrado · PetCare Store')}">
   </head>
   <body>
     <div th:replace="~{fragmentos/layout :: menu}">
@@ -8,18 +8,19 @@
     <main class="container-fluid contenido">
       <div th:replace="~{fragmentos/layout :: mensajes}">
       </div>
-      <section class="panel text-center py-5">
-        <p class="eyebrow">
-          ERROR 404
-        </p>
-        <h1>
-          Registro no encontrado
-        </h1>
-        <p th:text="${mensaje != null ? mensaje : 'La página o el registro solicitado no existe.'}">
-        </p>
-        <a class="btn btn-primary" th:href="@{/dashboard}">
-          Volver al inicio
-        </a>
+      <section class="panel-datos text-center py-5 px-4 mx-auto" style="max-width:620px;">
+        <span class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:56px;height:56px;background:#EAF3FF;color:#0A66C2;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+        </span>
+        <div>
+          <p class="eyebrow">ERROR 404</p>
+        </div>
+        <h1 class="h3 mb-2">Registro no encontrado</h1>
+        <p class="text-secondary mb-4" th:text="${mensaje != null ? mensaje : 'La página o el registro solicitado no existe.'}"></p>
+        <a class="btn btn-primary" th:href="@{/dashboard}">Volver al inicio</a>
       </section>
     </main>
     <div th:replace="~{fragmentos/layout :: pie}">

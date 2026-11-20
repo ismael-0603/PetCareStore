@@ -1,5 +1,15 @@
 # Verificación de PetCare Store
 
+## Verificación del 20 de noviembre de 2026
+
+| Comprobación | Resultado |
+|---|---|
+| Maven `verify` con H2 | 37 pruebas, 0 fallos, 0 errores, 0 omitidas. JAR ejecutable generado. |
+| Misma suite con MySQL Community 8.0.46 | 37 pruebas, 0 fallos, 0 errores, 0 omitidas. Instancia temporal aislada. |
+| Migración de clientes en MySQL | Detectó correos repetidos y el índice único rechazó su creación hasta corregirlos. Una vez creado, rechazó nuevos duplicados. |
+
+Se usó Microsoft OpenJDK 21 con objetivo Java 17 y el agente de Mockito explícito. Los cinco casos añadidos cubren teléfono, unicidad del correo al editar y crear, eliminación del último producto de una página filtrada, imágenes tras un fallo de guardado y ajuste de texto en el PDF.
+
 ## Actualización del 11 de noviembre de 2026
 
 Cambios: paginación, modal de registro y exportación a Excel/PDF en productos; limpieza de código (`@Override`, imports en lugar de nombres completos, `DashboardServicio`, eliminación de `login-perro.jpg` y de `ProductoServicio.listar()`, que no se usaban).
